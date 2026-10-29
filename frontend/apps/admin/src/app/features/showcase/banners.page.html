@@ -1,0 +1,89 @@
+<section class="page" aria-labelledby="banners-title">
+  <header class="page__header">
+    <div>
+      <h1 id="banners-title">Banners</h1>
+      <p>Carrusel del inicio público.</p>
+    </div>
+    <div class="page__actions">
+      <mega-button size="sm" (click)="openCreate()">+ Nuevo banner</mega-button>
+    </div>
+  </header>
+
+  <div class="mega-card mega-card--flush">
+    <mega-table
+      [columns]="columns()"
+      [rows]="rows()"
+      [loading]="loading()"
+      [rowKey]="rowKey"
+      emptyText="Aún no hay banners."
+      aria-label="Tabla de banners"
+    />
+
+    <ng-template #actionsCell let-row>
+      <div class="cell-actions">
+        <mega-button size="sm" variant="ghost" (click)="openEdit(row)">Editar</mega-button>
+        <mega-button size="sm" variant="outline" (click)="toggleActive(row)">
+          {{ row.active ? 'Desactivar' : 'Activar' }}
+        </mega-button>
+      </div>
+    </ng-template>
+  </div>
+</section>
+
+<mega-modal
+  [open]="modalOpen()"
+  [title]="editingId() ? 'Editar banner' : 'Nuevo banner'"
+  (close)="modalOpen.set(false)"
+>
+  <form class="d-grid gap-3" (ngSubmit)="save()">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+    <mega-input label="Título" name="banner-title" [ngModel]="title()" (ngModelChange)="title.set($event)" />
+    <mega-input
+      label="Subtítulo"
+      name="banner-subtitle"
+      [ngModel]="subtitle()"
+      (ngModelChange)="subtitle.set($event)"
+    />
+    <mega-input
+      label="Enlace (opcional)"
+      name="banner-link"
+      placeholder="/catalogo/..."
+      [ngModel]="linkUrl()"
+      (ngModelChange)="linkUrl.set($event)"
+    />
+    <mega-input
+      label="Orden"
+      name="banner-sort"
+      type="number"
+      [ngModel]="sortOrder()"
+      (ngModelChange)="sortOrder.set($event)"
+    />
+    <div class="form-grid">
+      <mega-date-picker
+        label="Desde"
+        name="banner-from"
+        [ngModel]="startsAt()"
+        (ngModelChange)="startsAt.set($event)"
+      />
+      <mega-date-picker
+        label="Hasta"
+        name="banner-to"
+        [ngModel]="endsAt()"
+        (ngModelChange)="endsAt.set($event)"
+      />
+    </div>
+    <mega-uploader
+      label="Imagen del banner"
+      hint="PNG, JPG o WEBP (máx. 8 MB)"
+      accept="image/*"
+      (filesSelected)="onFilesSelected($event)"
+    />
+    @if (uploading()) {
+      <p class="state-box state-box--info" role="status">Subiendo imagen…</p>
+    }
+  </form>
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="modalOpen.set(false)">Cancelar</mega-button>
+    <mega-button (click)="save()" [loading]="saving()">Guardar</mega-button>
+  </div>
+</mega-modal>

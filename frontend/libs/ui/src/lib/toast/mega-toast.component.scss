@@ -1,0 +1,113 @@
+.mega-toast__list {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: min(22.5rem, calc(100vw - 2rem));
+  pointer-events: none;
+}
+
+.mega-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.75rem 0.85rem;
+  background: var(--mega-surface, #fff);
+  border: 1px solid var(--mega-border, #dde2e7);
+  border-left: 4px solid var(--mega-text-secondary, #5b636d);
+  border-radius: var(--mega-radius-sm, 12px);
+  box-shadow: var(--mega-shadow-lg, 0 18px 36px rgba(17, 19, 24, 0.16));
+  font-family: var(--mega-font, 'Inter', sans-serif);
+  animation: mega-toast-in var(--mega-duration-base, 200ms) var(--mega-ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+
+  &--success {
+    border-left-color: var(--mega-green, #1f9d55);
+  }
+
+  &--error {
+    border-left-color: var(--mega-red, #d71920);
+  }
+
+  &--warning {
+    border-left-color: var(--mega-amber, #d97706);
+  }
+
+  &--info {
+    border-left-color: var(--mega-blue, #2563eb);
+  }
+}
+
+.mega-toast__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  background: var(--mega-surface-alt, #eef1f4);
+  font-size: 0.75rem;
+  color: var(--mega-text, #22262c);
+}
+
+.mega-toast__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mega-toast__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--mega-text, #22262c);
+}
+
+.mega-toast__message {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--mega-text-secondary, #5b636d);
+  overflow-wrap: anywhere;
+}
+
+.mega-toast__close {
+  flex: 0 0 auto;
+  width: 1.7rem;
+  height: 1.7rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--mega-text-secondary, #5b636d);
+  font-size: 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--mega-surface-alt, #eef1f4);
+    color: var(--mega-text, #22262c);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mega-red, #d71920);
+    outline-offset: 2px;
+  }
+}
+
+@keyframes mega-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(1rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mega-toast {
+    animation: none;
+  }
+}

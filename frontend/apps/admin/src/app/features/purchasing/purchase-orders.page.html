@@ -1,0 +1,231 @@
+<section class="page" aria-labelledby="purchase-orders-title">
+  <header class="page__header">
+    <div>
+      <h1 id="purchase-orders-title">Órdenes de compra</h1>
+      <p>Compras a proveedores: borradores, envíos y recepción de mercadería.</p>
+    </div>
+    <div class="page__actions">
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/compras/proveedores">Proveedores</a>
+      <mega-button size="sm" (click)="openCreate()">+ Nueva orden</mega-button>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <form class="toolbar" (ngSubmit)="applyFilters()" aria-label="Filtros de órdenes de compra">
+      <div class="toolbar__grow">
+        <mega-input
+          label="Buscar"
+          name="po-q"
+          type="search"
+          placeholder="Número o proveedor"
+          [ngModel]="query()"
+          (ngModelChange)="query.set($event)"
+        />
+      </div>
+      <div style="min-width: 200px">
+        <mega-select
+          label="Estado"
+          name="po-status"
+          [options]="statusOptions"
+          [ngModel]="status()"
+          (ngModelChange)="status.set($event)"
+        />
+      </div>
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="applyFilters()" size="sm">Aplicar</mega-button>
+    </form>
+  </div>
+
+  <div class="mega-card mega-card--flush">
+    <mega-table
+      [columns]="columns()"
+      [rows]="rows()"
+      [loading]="loading()"
+      [rowKey]="rowKey"
+      emptyText="No hay órdenes de compra."
+      aria-label="Tabla de órdenes de compra"
+    />
+
+    <ng-template #statusCell let-row>
+      <mega-status-badge [status]="row.status" />
+    </ng-template>
+
+    <ng-template #actionsCell let-row>
+      <div class="cell-actions">
+        @if (canOrder(row)) {
+          <mega-button size="sm" variant="outline" (click)="markOrdered(row)">Ordenar</mega-button>
+        }
+        @if (canReceive(row)) {
+          <mega-button size="sm" variant="ghost" (click)="openReceipt(row)">Recibir</mega-button>
+        }
+      </div>
+    </ng-template>
+  </div>
+
+  @if (!loading() && rows().length) {
+    <mega-pagination
+      [page]="page()"
+      [size]="size"
+      [total]="total()"
+      (pageChange)="goToPage($event)"
+      aria-label="Paginación de órdenes de compra"
+    />
+  }
+</section>
+
+<mega-modal [open]="createOpen()" title="Nueva orden de compra" size="lg" (close)="createOpen.set(false)">
+  <form class="d-grid gap-3" (ngSubmit)="create()">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+    <mega-select
+      label="Proveedor"
+      name="po-supplier"
+      [options]="supplierOptions()"
+      [ngModel]="supplierId()"
+      (ngModelChange)="supplierId.set($event)"
+    />
+
+    <div class="toolbar toolbar--wrap">
+      <div class="toolbar__grow">
+        <mega-input
+          label="Agregar producto"
+          name="po-product-search"
+          type="search"
+          placeholder="Buscar por nombre o SKU"
+          [ngModel]="productSearch()"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="productSearch.set($event)"
+        />
+      </div>
+      <mega-button (click)="searchProducts()" [loading]="searching()" size="sm">Buscar</mega-button>
+    </div>
+
+    @if (productResults().length) {
+      <div class="list-group-mega">
+        @for (variant of productResults(); track variant.variantId) {
+          <div class="list-group-mega__item">
+            <span>{{ variant.label }}</span>
+            <span class="toolbar__spacer"></span>
+            <mega-button size="sm" variant="ghost" (click)="addLine(variant)">Agregar</mega-button>
+          </div>
+        }
+      </div>
+    }
+
+    @if (lines().length) {
+      <div class="table-responsive">
+        <table class="table admin-table">
+          <thead>
+            <tr>
+              <th scope="col">Ítem</th>
+              <th scope="col" style="width: 120px">Cantidad</th>
+              <th scope="col" style="width: 140px">Costo unit.</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of lines(); track line.variantId) {
+              <tr>
+                <td>{{ line.label }}</td>
+                <td>
+                  <input
+                    class="form-control form-control-sm"
+                    type="number"
+                    min="0"
+                    [ngModel]="line.quantity"
+                    [ngModelOptions]="{ standalone: true }"
+                    (ngModelChange)="updateLine(line.variantId, { quantity: $event })"
+                    aria-label="Cantidad"
+                  />
+                </td>
+                <td>
+                  <input
+                    class="form-control form-control-sm"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    [ngModel]="line.unitCost"
+                    [ngModelOptions]="{ standalone: true }"
+                    (ngModelChange)="updateLine(line.variantId, { unitCost: $event })"
+                    aria-label="Costo unitario"
+                  />
+                </td>
+                <td class="text-end">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-link text-danger p-0"
+                    (click)="removeLine(line.variantId)"
+                  >
+                    Quitar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <mega-textarea
+      label="Notas"
+      name="po-notes"
+      [rows]="2"
+      [ngModel]="notes()"
+      (ngModelChange)="notes.set($event)"
+    />
+  </form>
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="createOpen.set(false)">Cancelar</mega-button>
+    <mega-button (click)="create()" [loading]="creating()">Crear orden</mega-button>
+  </div>
+</mega-modal>
+
+<mega-modal [open]="receiptOpen()" title="Recepción de mercadería" (close)="receiptOpen.set(false)">
+  @if (receiptOrder(); as order) {
+    <form class="d-grid gap-3" (ngSubmit)="submitReceipt()">
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <div class="table-responsive">
+        <table class="table admin-table">
+          <thead>
+            <tr>
+              <th scope="col">Ítem</th>
+              <th scope="col" class="text-end">Pedida</th>
+              <th scope="col" class="text-end">Ya recibida</th>
+              <th scope="col" style="width: 130px">A recibir</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of order.items; track item.id) {
+              <tr>
+                <td>{{ item.description || item.sku || item.variantId.slice(0, 8) + '…' }}</td>
+                <td class="text-end mono">{{ item.quantity }}</td>
+                <td class="text-end mono">{{ item.receivedQuantity ?? '0' }}</td>
+                <td>
+                  <input
+                    class="form-control form-control-sm text-end"
+                    type="number"
+                    min="0"
+                    [ngModel]="receiptQtys()[item.id] ?? '0'"
+                    [ngModelOptions]="{ standalone: true }"
+                    (ngModelChange)="setReceiptQty(item.id, $event)"
+                    [attr.aria-label]="'Cantidad a recibir de ' + (item.description || item.sku)"
+                  />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <mega-textarea
+        label="Notas de recepción"
+        name="receipt-notes"
+        [rows]="2"
+        [ngModel]="receiptNotes()"
+        (ngModelChange)="receiptNotes.set($event)"
+      />
+    </form>
+    <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+      <mega-button variant="ghost" (click)="receiptOpen.set(false)">Cancelar</mega-button>
+      <mega-button (click)="submitReceipt()" [loading]="receiptSubmitting()">Registrar recepción</mega-button>
+    </div>
+  }
+</mega-modal>

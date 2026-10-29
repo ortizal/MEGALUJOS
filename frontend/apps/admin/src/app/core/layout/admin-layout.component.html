@@ -1,0 +1,94 @@
+<div class="admin-shell">
+  @if (sidebarOpen()) {
+    <div class="sidebar__overlay" (click)="closeSidebar()" aria-hidden="true"></div>
+  }
+
+  <aside class="sidebar" [class.open]="sidebarOpen()" aria-label="Navegación principal">
+    <a class="sidebar__brand" routerLink="/dashboard" (click)="closeSidebar()">
+      <span class="sidebar__logo" aria-hidden="true">M</span>
+      <span class="sidebar__wordmark">MEGA<span>LUJOS</span></span>
+    </a>
+
+    <nav class="sidebar__nav">
+      @for (section of sections(); track section.title) {
+        @if (visibleItems(section).length) {
+          <div class="sidebar__section">
+            <p class="sidebar__section-title">{{ section.title }}</p>
+            @for (item of visibleItems(section); track item.label + item.path) {
+              <a
+                class="sidebar__link"
+                [routerLink]="item.path"
+                [queryParams]="item.queryParams ?? null"
+                routerLinkActive="active"
+                (click)="closeSidebar()"
+              >
+                <span class="sidebar__icon" aria-hidden="true">{{ item.icon }}</span>
+                <span>{{ item.label }}</span>
+              </a>
+            }
+          </div>
+        }
+      }
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="topbar">
+      <button
+        type="button"
+        class="topbar__burger"
+        (click)="toggleSidebar()"
+        [attr.aria-expanded]="sidebarOpen()"
+        aria-controls="admin-sidebar"
+        aria-label="Abrir o cerrar menú"
+      >
+        ☰
+      </button>
+
+      <nav aria-label="Ruta de navegación">
+        <ol class="topbar__breadcrumb">
+          @for (crumb of breadcrumb(); track crumb; let last = $last) {
+            <li>
+              @if (!last) {
+                <span>{{ crumb }}</span>
+                <span class="topbar__sep" aria-hidden="true">/</span>
+              } @else {
+                <span class="current" aria-current="page">{{ crumb }}</span>
+              }
+            </li>
+          }
+        </ol>
+      </nav>
+
+      <div class="topbar__actions">
+        <button
+          type="button"
+          class="topbar__icon-btn"
+          (click)="toggleTheme()"
+          [attr.aria-label]="theme.isDark() ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
+          [title]="theme.isDark() ? 'Tema claro' : 'Tema oscuro'"
+        >
+          {{ theme.isDark() ? '☀️' : '🌙' }}
+        </button>
+
+        <span class="topbar__user">
+          <strong>{{ auth.user()?.fullName || auth.user()?.username || 'Usuario' }}</strong>
+          <span>{{ (auth.user()?.roles ?? []).join(', ') || 'Sin roles' }}</span>
+        </span>
+
+        <button
+          type="button"
+          class="btn btn-outline-danger btn-sm"
+          (click)="logout()"
+          title="Cerrar sesión"
+        >
+          Salir
+        </button>
+      </div>
+    </header>
+
+    <main class="admin-content" id="contenido">
+      <router-outlet />
+    </main>
+  </div>
+</div>

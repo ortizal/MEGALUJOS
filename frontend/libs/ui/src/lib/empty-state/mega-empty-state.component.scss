@@ -1,0 +1,52 @@
+.mega-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--mega-text-secondary, #5b636d);
+
+  &__icon {
+    font-size: 2.5rem;
+    line-height: 1;
+  }
+
+  &__title {
+    margin: 0;
+    font-family: var(--mega-font, 'Inter', sans-serif);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--mega-text, #22262c);
+  }
+
+  &__message {
+    margin: 0;
+    max-width: 36rem;
+    font-size: 0.875rem;
+  }
+
+  &__action {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1.1rem;
+    font-family: var(--mega-font, 'Inter', sans-serif);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--mega-white, #fff);
+    background: var(--mega-red, #d71920);
+    border: none;
+    border-radius: var(--mega-radius-sm, 12px);
+    cursor: pointer;
+    transition: background-color var(--mega-transition, 180ms ease);
+
+    &:hover {
+      background: var(--mega-red-hover, #b9141a);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--mega-red, #d71920);
+      outline-offset: 2px;
+    }
+  }
+}

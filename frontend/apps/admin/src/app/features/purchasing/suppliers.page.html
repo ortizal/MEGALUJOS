@@ -1,0 +1,95 @@
+<section class="page" aria-labelledby="suppliers-title">
+  <header class="page__header">
+    <div>
+      <h1 id="suppliers-title">Proveedores</h1>
+      <p>Contactos de compra para órdenes y recepciones.</p>
+    </div>
+    <div class="page__actions">
+      <mega-button size="sm" (click)="openCreate()">+ Nuevo proveedor</mega-button>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <form class="toolbar" (ngSubmit)="applyFilters()" aria-label="Búsqueda de proveedores">
+      <div class="toolbar__grow">
+        <mega-input
+          label="Buscar"
+          name="suppliers-q"
+          type="search"
+          placeholder="Nombre o RUC"
+          [ngModel]="query()"
+          (ngModelChange)="query.set($event)"
+        />
+      </div>
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="applyFilters()" size="sm">Buscar</mega-button>
+    </form>
+  </div>
+
+  <div class="mega-card mega-card--flush">
+    <mega-table
+      [columns]="columns()"
+      [rows]="rows()"
+      [loading]="loading()"
+      [rowKey]="rowKey"
+      emptyText="No hay proveedores registrados."
+      aria-label="Tabla de proveedores"
+    />
+
+    <ng-template #actionsCell let-row>
+      <div class="cell-actions">
+        <mega-button size="sm" variant="ghost" (click)="openEdit(row)">Editar</mega-button>
+        <mega-button size="sm" variant="outline" (click)="toggleActive(row)">
+          {{ row.active ? 'Desactivar' : 'Activar' }}
+        </mega-button>
+      </div>
+    </ng-template>
+  </div>
+
+  @if (!loading() && rows().length) {
+    <mega-pagination
+      [page]="page()"
+      [size]="size"
+      [total]="total()"
+      (pageChange)="goToPage($event)"
+      aria-label="Paginación de proveedores"
+    />
+  }
+</section>
+
+<mega-modal
+  [open]="modalOpen()"
+  [title]="editingId() ? 'Editar proveedor' : 'Nuevo proveedor'"
+  (close)="modalOpen.set(false)"
+>
+  <form class="d-grid gap-3" (ngSubmit)="save()">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+    <mega-input label="Nombre" name="supplier-name" [ngModel]="name()" (ngModelChange)="name.set($event)" />
+    <mega-input label="RUC" name="supplier-tax" [ngModel]="taxId()" (ngModelChange)="taxId.set($event)" />
+    <mega-input
+      label="Persona de contacto"
+      name="supplier-contact"
+      [ngModel]="contactName()"
+      (ngModelChange)="contactName.set($event)"
+    />
+    <mega-input label="Teléfono" name="supplier-phone" [ngModel]="phone()" (ngModelChange)="phone.set($event)" />
+    <mega-input
+      label="Email"
+      name="supplier-email"
+      type="email"
+      [ngModel]="email()"
+      (ngModelChange)="email.set($event)"
+    />
+    <mega-textarea
+      label="Dirección"
+      name="supplier-address"
+      [rows]="2"
+      [ngModel]="address()"
+      (ngModelChange)="address.set($event)"
+    />
+  </form>
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="modalOpen.set(false)">Cancelar</mega-button>
+    <mega-button (click)="save()" [loading]="saving()">Guardar</mega-button>
+  </div>
+</mega-modal>

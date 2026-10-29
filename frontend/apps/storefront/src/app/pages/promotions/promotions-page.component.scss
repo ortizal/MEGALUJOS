@@ -1,0 +1,54 @@
+.promotions-card {
+  position: relative;
+  display: grid;
+  gap: 0.6rem;
+  padding: 1.5rem;
+  align-content: start;
+}
+
+.promotions-card__badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: var(--mega-radius-pill);
+  background: var(--mega-red);
+  color: var(--mega-white);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.promotions-card__title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--mega-black);
+  margin: 0;
+  padding-right: 4.5rem;
+}
+
+.promotions-card__text {
+  color: var(--mega-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.promotions-card__validity {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--mega-text);
+  margin: 0;
+}
+
+.promotions-skeleton-card {
+  padding: 1.5rem;
+}
+
+.promotions-empty-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: -1.5rem;
+  margin-bottom: 1.5rem;
+}

@@ -1,0 +1,146 @@
+<section class="page" aria-labelledby="returns-title">
+  <header class="page__header">
+    <div>
+      <h1 id="returns-title">Devoluciones</h1>
+      <p>Busca una venta y registra la devolución de dinero y el retorno de stock.</p>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <form class="toolbar" (ngSubmit)="searchSale()" aria-label="Buscar venta">
+      <div class="toolbar__grow">
+        <mega-input
+          label="Número de venta"
+          name="return-q"
+          type="search"
+          placeholder="Ej. VTA-000123"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </div>
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="searchSale()" [loading]="searching()">Buscar venta</mega-button>
+    </form>
+  </div>
+
+  @if (result(); as returnNumber) {
+    <div class="state-box state-box--success" role="status">
+      Devolución <strong class="mono">{{ returnNumber }}</strong> registrada correctamente.
+      <button type="button" class="btn btn-link btn-sm p-0 ms-2" (click)="reset()">
+        Nueva devolución
+      </button>
+    </div>
+  }
+
+  @if (sale(); as sale) {
+    <div class="mega-card">
+      <dl class="detail-grid">
+        <div>
+          <dt>Venta</dt>
+          <dd class="mono">{{ sale.saleNumber }}</dd>
+        </div>
+        <div>
+          <dt>Fecha</dt>
+          <dd>{{ dateTime(sale.createdAt) }}</dd>
+        </div>
+        <div>
+          <dt>Estado</dt>
+          <dd><mega-status-badge [status]="sale.status" /></dd>
+        </div>
+        <div>
+          <dt>Total venta</dt>
+          <dd>{{ money(sale.grandTotal) }}</dd>
+        </div>
+      </dl>
+
+      <h2 class="section-title">Ítems a devolver</h2>
+
+      @if (!lines().length) {
+        <p class="state-box state-box--warning">
+          Esta venta no tiene líneas con cantidad restante por devolver.
+        </p>
+      } @else {
+        <div class="table-responsive">
+          <table class="table admin-table">
+            <thead>
+              <tr>
+                <th scope="col">Descripción</th>
+                <th scope="col" class="text-end">Disp.</th>
+                <th scope="col" style="width: 120px">Cant. a devolver</th>
+                <th scope="col" style="width: 130px">Retorna a stock</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of lines(); track line.saleItemId) {
+                <tr>
+                  <td>{{ line.description }}</td>
+                  <td class="text-end mono">{{ line.maxQuantity }}</td>
+                  <td>
+                    <input
+                      class="form-control form-control-sm"
+                      type="number"
+                      min="0"
+                      [max]="line.maxQuantity"
+                      [ngModel]="line.quantity"
+                      [ngModelOptions]="{ standalone: true }"
+                      (ngModelChange)="setQuantity(line.saleItemId, $event)"
+                      [attr.aria-label]="'Cantidad a devolver de ' + line.description"
+                    />
+                  </td>
+                  <td>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        [ngModel]="line.restock"
+                        [ngModelOptions]="{ standalone: true }"
+                        (ngModelChange)="setRestock(line.saleItemId, $event)"
+                        [id]="'restock-' + line.saleItemId"
+                      />
+                      <label class="form-check-label" [for]="'restock-' + line.saleItemId">
+                        Devolver
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <form class="return-form" (ngSubmit)="submit()">
+          <div class="return-form__field">
+            <mega-textarea
+              label="Motivo de la devolución"
+              name="return-reason"
+              placeholder="Motivo detallado (mínimo 5 caracteres)"
+              [rows]="3"
+              [ngModel]="reason()"
+              (ngModelChange)="reason.set($event)"
+            />
+          </div>
+          <div class="return-form__field">
+            <mega-select
+              label="Reembolso mediante"
+              name="return-method"
+              [options]="methodOptions"
+              [ngModel]="paymentMethod()"
+              (ngModelChange)="paymentMethod.set($event)"
+            />
+          </div>
+          <div class="return-summary">
+            <span>Total a devolver (estimado)</span>
+            <strong class="return-summary__total">{{ money(estimatedTotal()) }}</strong>
+          </div>
+          <div class="d-flex gap-2 justify-content-end">
+            <mega-button variant="ghost" type="button" (click)="reset()">Cancelar</mega-button>
+            <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+            <mega-button (click)="submit()" [loading]="submitting()" variant="primary">
+              Confirmar devolución
+            </mega-button>
+          </div>
+        </form>
+      }
+    </div>
+  }
+</section>

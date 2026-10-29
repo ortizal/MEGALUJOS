@@ -1,0 +1,234 @@
+﻿<section class="page" aria-labelledby="sales-title">
+  <header class="page__header">
+    <div>
+      <h1 id="sales-title">Ventas</h1>
+      <p>Historial paginado con detalle, factura electrónica y RIDE.</p>
+    </div>
+    <div class="page__actions">
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="applyFilters()">
+        Recargar
+      </button>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <form class="toolbar" (ngSubmit)="applyFilters()" aria-label="Filtros de ventas">
+      <div class="toolbar__grow">
+        <mega-input
+          label="Buscar"
+          name="sales-q"
+          type="search"
+          placeholder="Número de venta o cliente"
+          [ngModel]="query()"
+          (ngModelChange)="query.set($event)"
+        />
+      </div>
+      <div style="min-width: 190px">
+        <mega-select
+          label="Estado"
+          name="sales-status"
+          [options]="statusOptions"
+          [ngModel]="status()"
+          (ngModelChange)="status.set($event)"
+        />
+      </div>
+      <div style="min-width: 160px">
+        <mega-date-picker
+          label="Desde"
+          name="sales-from"
+          [ngModel]="dateFrom()"
+          (ngModelChange)="dateFrom.set($event)"
+        />
+      </div>
+      <div style="min-width: 160px">
+        <mega-date-picker
+          label="Hasta"
+          name="sales-to"
+          [ngModel]="dateTo()"
+          (ngModelChange)="dateTo.set($event)"
+        />
+      </div>
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="applyFilters()" size="sm">Aplicar</mega-button>
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        (click)="query.set(''); status.set(''); dateFrom.set(''); dateTo.set(''); applyFilters()"
+      >
+        Limpiar
+      </button>
+    </form>
+  </div>
+
+  @if (error(); as message) {
+    <mega-empty-state
+      icon="⚠️"
+      title="No pudimos cargar las ventas"
+      [message]="message"
+      actionLabel="Reintentar"
+      (action)="load()"
+    />
+  } @else {
+    <div class="mega-card mega-card--flush">
+      <mega-table
+        [columns]="columns()"
+        [rows]="rows()"
+        [loading]="loading()"
+        [rowKey]="rowKey"
+        emptyText="No hay ventas registradas con estos filtros."
+        (onRowClick)="openDetail($event.row)"
+        aria-label="Tabla de ventas"
+      />
+    </div>
+
+    @if (!loading() && rows().length) {
+      <mega-pagination
+        [page]="page()"
+        [size]="size"
+        [total]="total()"
+        (pageChange)="goToPage($event)"
+        aria-label="Paginación de ventas"
+      />
+    }
+  }
+</section>
+
+<ng-template #statusCell let-row>
+  <mega-status-badge [status]="row.status" />
+</ng-template>
+
+<ng-template #actionsCell let-row>
+  <div class="cell-actions">
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="openDetail(row)">
+      Ver detalle
+    </button>
+  </div>
+</ng-template>
+
+<mega-modal
+  [open]="!!selected() || detailLoading()"
+  [title]="detailLoading() ? 'Cargando venta…' : 'Detalle de venta'"
+  size="lg"
+  (close)="closeDetail()"
+>
+  @if (detailLoading()) {
+    <p class="state-box state-box--info" role="status">Consultando la venta…</p>
+  } @else if (selected(); as sale) {
+    <dl class="detail-grid">
+      <div>
+        <dt>Número</dt>
+        <dd class="mono">{{ sale.saleNumber }}</dd>
+      </div>
+      <div>
+        <dt>Fecha</dt>
+        <dd>{{ dateTime(sale.createdAt) }}</dd>
+      </div>
+      <div>
+        <dt>Cliente</dt>
+        <dd>{{ sale.customerId ? 'Cliente registrado' : 'Consumidor final' }}</dd>
+      </div>
+      <div>
+        <dt>Estado</dt>
+        <dd><mega-status-badge [status]="sale.status" /></dd>
+      </div>
+      <div>
+        <dt>Subtotal</dt>
+        <dd>{{ money(sale.subtotal) }}</dd>
+      </div>
+      <div>
+        <dt>Descuentos</dt>
+        <dd>{{ money(sale.discountTotal) }}</dd>
+      </div>
+      <div>
+        <dt>Impuestos</dt>
+        <dd>{{ money(sale.taxTotal) }}</dd>
+      </div>
+      <div>
+        <dt>Total</dt>
+        <dd>{{ money(sale.grandTotal) }}</dd>
+      </div>
+      @if (sale.totalReturned) {
+        <div>
+          <dt>Devuelto</dt>
+          <dd>{{ money(sale.totalReturned) }}</dd>
+        </div>
+      }
+    </dl>
+
+    <h3 class="section-title">Ítems</h3>
+    <div class="table-responsive">
+      <table class="table admin-table">
+        <thead>
+          <tr>
+            <th scope="col">Descripción</th>
+            <th scope="col" class="text-end">Cant.</th>
+            <th scope="col" class="text-end">P. unit.</th>
+            <th scope="col" class="text-end">Descuento</th>
+            <th scope="col" class="text-end">IVA</th>
+            <th scope="col" class="text-end">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of sale.items; track item.id) {
+            <tr>
+              <td>{{ item.description }}</td>
+              <td class="text-end">{{ item.quantity }}</td>
+              <td class="text-end">{{ money(item.unitPrice) }}</td>
+              <td class="text-end">{{ money(item.discount) }}</td>
+              <td class="text-end">{{ money(item.taxAmount) }}</td>
+              <td class="text-end"><strong>{{ money(item.lineTotal) }}</strong></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="section-title">Pagos</h3>
+    <div class="table-responsive">
+      <table class="table admin-table">
+        <thead>
+          <tr>
+            <th scope="col">Medio</th>
+            <th scope="col" class="text-end">Monto</th>
+            <th scope="col">Referencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (payment of sale.payments; track $index) {
+            <tr>
+              <td>{{ paymentLabel(payment.method) }}</td>
+              <td class="text-end">{{ money(payment.amount) }}</td>
+              <td>{{ payment.reference || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (sale.returns?.length) {
+      <h3 class="section-title">Devoluciones</h3>
+      <div class="list-group-mega">
+        @for (saleReturn of sale.returns; track saleReturn.id) {
+          <div class="list-group-mega__item">
+            <strong class="mono">{{ saleReturn.returnNumber }}</strong>
+            <span class="text-muted-mega">{{ dateTime(saleReturn.createdAt) }}</span>
+            <span class="toolbar__spacer"></span>
+            <span>{{ money(saleReturn.totalReturned) }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="d-flex flex-wrap gap-2 mt-3" megaModalFooter>
+      <mega-button variant="outline" (click)="downloadRide(sale)" [disabled]="detailLoading()">
+        📥 Descargar RIDE
+      </mega-button>
+      @if (canInvoice(sale)) {
+        <mega-button variant="secondary" (click)="issueInvoice(sale)">
+          🧾 Emitir factura electrónica
+        </mega-button>
+      }
+      <mega-button variant="ghost" (click)="closeDetail()">Cerrar</mega-button>
+    </div>
+  }
+</mega-modal>

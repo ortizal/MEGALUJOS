@@ -1,0 +1,25 @@
+# Dependencias y artefactos
+node_modules/
+dist/
+.angular/
+.ng-x/
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Documentación y configs que no hacen falta en la imagen
+*.md
+.prettierrc
+.editorconfig
+
+# Docker
+Dockerfile
+.dockerignore

@@ -1,0 +1,222 @@
+<section class="page" aria-labelledby="product-form-title">
+  <header class="page__header">
+    <div>
+      <p class="page__breadcrumb">
+        <a routerLink="/catalogo/productos">Productos</a> /
+        {{ isEdit ? 'Editar' : 'Nuevo' }}
+      </p>
+      <h1 id="product-form-title">{{ isEdit ? 'Editar producto' : 'Nuevo producto' }}</h1>
+    </div>
+    <div class="page__actions">
+      <mega-button variant="ghost" (click)="save()" [loading]="saving()">Guardar</mega-button>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/catalogo/productos">Cancelar</a>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="state-box state-box--info" role="status">Cargando producto…</div>
+  } @else {
+    <div class="product-form">
+      <div class="mega-card">
+        <h2 class="section-title">Datos generales</h2>
+        <div class="form-grid">
+          <mega-input
+            label="SKU"
+            name="product-sku"
+            placeholder="Ej. FILTRO-001"
+            [ngModel]="sku()"
+            (ngModelChange)="sku.set($event)"
+          />
+          <mega-input
+            label="Nombre"
+            name="product-name"
+            placeholder="Nombre comercial"
+            [ngModel]="name()"
+            (ngModelChange)="name.set($event)"
+          />
+          <mega-select
+            label="Tipo"
+            name="product-type"
+            [options]="typeOptions"
+            [ngModel]="productType()"
+            (ngModelChange)="productType.set($event)"
+          />
+          <mega-input
+            label="Unidad"
+            name="product-unit"
+            placeholder="UND"
+            [ngModel]="unit()"
+            (ngModelChange)="unit.set($event)"
+          />
+          <mega-select
+            label="Categoría"
+            name="product-category"
+            [options]="categoryOptions()"
+            [ngModel]="categoryId()"
+            (ngModelChange)="categoryId.set($event)"
+          />
+          <mega-select
+            label="Marca"
+            name="product-brand"
+            [options]="brandOptions()"
+            [ngModel]="brandId()"
+            (ngModelChange)="brandId.set($event)"
+          />
+        </div>
+        <mega-textarea
+          label="Descripción"
+          name="product-description"
+          [rows]="3"
+          [ngModel]="description()"
+          (ngModelChange)="description.set($event)"
+        />
+        <div class="form-check mt-2">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="product-track"
+            [checked]="trackStock()"
+            (change)="trackStock.set($any($event.target).checked)"
+          />
+          <label class="form-check-label" for="product-track">Controlar stock</label>
+        </div>
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="product-published"
+            [checked]="published()"
+            (change)="published.set($any($event.target).checked)"
+          />
+          <label class="form-check-label" for="product-published">Publicado en vitrina</label>
+        </div>
+      </div>
+
+      <div class="mega-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <h2 class="section-title mb-0">Variantes</h2>
+          <mega-button variant="secondary" size="sm" (click)="addVariant()">
+            + Agregar variante
+          </mega-button>
+        </div>
+        <div class="table-responsive mt-3">
+          <table class="table admin-table">
+            <thead>
+              <tr>
+                <th scope="col">SKU</th>
+                <th scope="col">Código de barras</th>
+                <th scope="col" class="text-end">Precio venta</th>
+                <th scope="col" class="text-end">Costo</th>
+                <th scope="col" class="text-end">Stock mín.</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (variant of variants(); track $index; let i = $index) {
+                <tr>
+                  <td>
+                    <input
+                      class="form-control form-control-sm"
+                      [ngModel]="variant.sku"
+                      [ngModelOptions]="{ standalone: true }"
+                      (ngModelChange)="updateVariant(i, { sku: $event })"
+                      aria-label="SKU de la variante"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      class="form-control form-control-sm"
+                      [ngModel]="variant.barcode"
+                      [ngModelOptions]="{ standalone: true }"
+                      (ngModelChange)="updateVariant(i, { barcode: $event })"
+                      aria-label="Código de barras"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      class="form-control form-control-sm text-end"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      [ngModel]="variant.salePrice"
+                      [ngModelOptions]="{ standalone: true }"
+                      (ngModelChange)="updateVariant(i, { salePrice: $event })"
+                      aria-label="Precio de venta"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      class="form-control form-control-sm text-end"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      [ngModel]="variant.costPrice"
+                      [ngModelOptions]="{ standalone: true }"
+                      (ngModelChange)="updateVariant(i, { costPrice: $event })"
+                      aria-label="Precio de costo"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      class="form-control form-control-sm text-end"
+                      type="number"
+                      min="0"
+                      [ngModel]="variant.minStock"
+                      [ngModelOptions]="{ standalone: true }"
+                      (ngModelChange)="updateVariant(i, { minStock: $event })"
+                      aria-label="Stock mínimo"
+                    />
+                  </td>
+                  <td class="text-end">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link text-danger p-0"
+                      (click)="removeVariant(i)"
+                    >
+                      Quitar
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      @if (isEdit) {
+        <div class="mega-card">
+          <h2 class="section-title">Imágenes</h2>
+          <mega-uploader
+            label="Subir imagen del producto"
+            hint="PNG, JPG o WEBP (máx. 8 MB)"
+            accept="image/*"
+            [multiple]="false"
+            (filesSelected)="onFilesSelected($event)"
+          />
+          @if (uploading()) {
+            <p class="state-box state-box--info mt-2" role="status">Subiendo imagen…</p>
+          }
+          <div class="gallery-list mt-3">
+            @for (image of images(); track image.id) {
+              <figure class="gallery-item" [class.gallery-item--primary]="image.primary">
+                <img [src]="image.url" [attr.alt]="'Imagen ' + image.sortOrder" />
+                <figcaption class="gallery-item__actions">
+                  @if (image.primary) {
+                    <span class="badge bg-danger">Principal</span>
+                  } @else {
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="setPrimary(image)">
+                      Principal
+                    </button>
+                  }
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeImage(image)">
+                    Quitar
+                  </button>
+                </figcaption>
+              </figure>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

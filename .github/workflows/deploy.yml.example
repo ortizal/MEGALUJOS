@@ -1,0 +1,133 @@
+# =============================================================================
+# MEGALUJOS — ejemplo de despliegue a VPS por SSH (NO activo)
+# =============================================================================
+# Cómo usar este archivo:
+#   1. Copiarlo como deploy.yml y rellenar los placeholders:
+#        {{VPS_HOST}}          IP o dominio del VPS (p. ej. 203.0.113.10)
+#        {{VPS_USER}}          usuario SSH sin privilegios de root (p. ej. deploy)
+#        {{DEPLOY_PATH}}       ruta de la app en el VPS (p. ej. /opt/megalujos)
+#        {{SSH_PRIVATE_KEY}}   clave SSH privada guardada en GitHub Secrets
+#   2. Definir en GitHub → Settings → Secrets and variables → Actions:
+#        VPS_HOST, VPS_USER, DEPLOY_PATH, SSH_PRIVATE_KEY
+#        (opcional) REGISTRY, IMAGE_TAG
+#   3. Activar el trigger quitando el comentario de `workflow_dispatch` y de
+#      la rama en `push`.
+#
+# REGLAS:
+#   - Nunca poner secretos reales en este archivo; solo ${{ secrets.* }}.
+#   - Las migraciones Flyway corren automáticamente al arrancar el backend;
+#     revisar docs/runbooks/deploy.md antes de desplegar esquemas nuevos.
+#   - Tener siempre un plan de rollback (docs/runbooks/deploy.md).
+# =============================================================================
+name: Deploy (ejemplo)
+
+on: {}
+# on:
+#   workflow_dispatch:            # despliegue manual desde la pestaña Actions
+#   push:
+#     branches: [ main ]
+
+permissions:
+  contents: read
+
+env:
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Opción A — despliegue por rsync del código + docker compose en el VPS
+  # ---------------------------------------------------------------------------
+  deploy-rsync:
+    name: Deploy · rsync + compose
+    # if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H {{VPS_HOST}} >> ~/.ssh/known_hosts
+
+      - name: Sincronizar código (excluyendo .git, node_modules, target)
+        run: |
+          rsync -azv --delete \
+            --exclude '.git/' \
+            --exclude 'node_modules/' \
+            --exclude 'target/' \
+            --exclude 'dist/' \
+            --exclude '.env' \
+            --exclude 'uploads/' \
+            --exclude 'infra/nginx/certs/' \
+            ./ {{VPS_USER}}@{{VPS_HOST}}:{{DEPLOY_PATH}}/
+
+      # El .env NUNCA viaja por el repo: se actualiza aparte (o se gestiona en el VPS)
+      # - name: Subir .env (solo si existe como secret/file gestionado)
+      #   run: |
+      #     echo "${{ secrets.ENV_FILE }}" > .env.tmp
+      #     scp .env.tmp {{VPS_USER}}@{{VPS_HOST}}:{{DEPLOY_PATH}}/.env
+      #     rm -f .env.tmp
+
+      - name: Levantar la pila
+        run: |
+          ssh {{VPS_USER}}@{{VPS_HOST}} << 'EOF'
+            set -e
+            cd {{DEPLOY_PATH}}
+            docker compose -f infra/compose.yaml --env-file .env pull || true
+            docker compose -f infra/compose.yaml --env-file .env build
+            docker compose -f infra/compose.yaml --env-file .env up -d --remove-orphans
+            docker compose -f infra/compose.yaml --env-file .env ps
+          EOF
+
+      - name: Smoke test (health)
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS "http://{{VPS_HOST}}/actuator/health" | grep -q '"status":"UP"'; then
+              echo "Backend UP"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "El healthcheck no respondió en 5 minutos"
+          exit 1
+
+      - name: Rollback automático si falla el smoke test
+        if: failure()
+        run: |
+          ssh {{VPS_USER}}@{{VPS_HOST}} << 'EOF'
+            set -e
+            cd {{DEPLOY_PATH}}
+            # Volver a la imagen anterior (etiqueta anterior en .deploy-tag)
+            PREV=$(cat .deploy-tag 2>/dev/null || echo "")
+            if [ -n "$PREV" ]; then
+              docker tag megalujos-backend:$PREV megalujos-backend:latest || true
+              docker compose -f infra/compose.yaml --env-file .env up -d --no-build backend
+            fi
+          EOF
+
+  # ---------------------------------------------------------------------------
+  # Opción B — despliegue con imágenes publicadas en un registry
+  # ---------------------------------------------------------------------------
+  # deploy-registry:
+  #   name: Deploy · pull de imágenes
+  #   runs-on: ubuntu-latest
+  #   needs: []
+  #   steps:
+  #     - name: Despliegue en el VPS
+  #       uses: appleboy/ssh-action@v1
+  #       with:
+  #         host: ${{ secrets.VPS_HOST }}
+  #         username: ${{ secrets.VPS_USER }}
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         script: |
+  #           set -e
+  #           cd ${{ secrets.DEPLOY_PATH }}
+  #           echo "${{ github.sha }}" > .deploy-tag
+  #           docker compose -f infra/compose.yaml --env-file .env pull backend admin storefront
+  #           docker compose -f infra/compose.yaml --env-file .env up -d --remove-orphans
+  #           docker compose -f infra/compose.yaml --env-file .env ps
+  #
+  #     - name: Smoke test
+  #       run: curl -fsS http://${{ secrets.VPS_HOST }}/actuator/health

@@ -1,0 +1,95 @@
+<a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+
+<header class="store-header">
+  <div class="store-container store-header__inner">
+    <a class="store-wordmark" routerLink="/" aria-label="MEGALUJOS, ir al inicio">
+      MEGA<span class="store-wordmark__accent">LUJOS</span>
+    </a>
+
+    <button
+      type="button"
+      class="store-header__toggle"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="store-nav"
+      (click)="toggleMenu()"
+    >
+      <span class="store-sr-only-accessible">Menú</span>
+      <span aria-hidden="true">{{ menuOpen() ? '✕' : '☰' }}</span>
+    </button>
+
+    <nav
+      id="store-nav"
+      class="store-header__nav"
+      [class.store-header__nav--open]="menuOpen()"
+      aria-label="Navegación principal"
+    >
+      @for (link of navLinks; track link.path) {
+        <a
+          class="store-header__link"
+          [routerLink]="link.path"
+          routerLinkActive="store-header__link--active"
+          [routerLinkActiveOptions]="{ exact: link.exact }"
+          >{{ link.label }}</a
+        >
+      }
+      <a
+        class="store-header__link store-header__link--wa"
+        [href]="whatsappUrl"
+        target="_blank"
+        rel="noopener"
+        >WhatsApp</a
+      >
+    </nav>
+  </div>
+</header>
+
+<main id="main-content" class="store-main" tabindex="-1">
+  <router-outlet />
+</main>
+
+<footer class="store-footer">
+  <div class="store-container store-footer__grid">
+    <div>
+      <p class="store-footer__brand">MEGA<span>LUJOS</span></p>
+      <p class="store-footer__text">
+        Accesorios y servicios automotrices premium. Estilo, protección y calidad para tu vehículo.
+      </p>
+    </div>
+
+    <div>
+      <h2 class="store-footer__title">Contacto</h2>
+      <ul class="store-footer__list">
+        <li>
+          <a [href]="whatsappUrl" target="_blank" rel="noopener">WhatsApp: {{ contactPhone }}</a>
+        </li>
+        <li>{{ address }}</li>
+        <li>{{ hours }}</li>
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="store-footer__title">Explora</h2>
+      <ul class="store-footer__list">
+        <li><a routerLink="/catalogo">Catálogo</a></li>
+        <li><a routerLink="/servicios">Servicios</a></li>
+        <li><a routerLink="/promociones">Promociones</a></li>
+        <li><a routerLink="/vehiculos">Por vehículo</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="store-footer__title">Síguenos</h2>
+      <div class="store-footer__social">
+        <a [href]="facebookUrl" aria-label="Facebook" target="_blank" rel="noopener">Facebook</a>
+        <a [href]="instagramUrl" aria-label="Instagram" target="_blank" rel="noopener">Instagram</a>
+        <a [href]="youtubeUrl" aria-label="YouTube" target="_blank" rel="noopener">YouTube</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="store-footer__bottom">
+    <div class="store-container">© {{ year }} MEGALUJOS. Todos los derechos reservados.</div>
+  </div>
+</footer>
+
+<app-whatsapp-button />

@@ -1,0 +1,20 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../out-tsc/lib",
+    "declaration": true,
+    "declarationMap": true,
+    "types": [],
+    "paths": {
+      "@megalujos/models": ["../../dist/models/types/models.d.ts"],
+      "@megalujos/theme": ["../../dist/theme/types/theme.d.ts"],
+      "@megalujos/api-client": ["../../dist/api-client/types/api-client.d.ts"],
+      "@megalujos/auth": ["../../dist/auth/types/auth.d.ts"],
+      "@megalujos/ui": ["../../dist/ui/types/ui.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["**/*.spec.ts"]
+}

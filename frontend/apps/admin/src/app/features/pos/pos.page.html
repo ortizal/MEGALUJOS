@@ -1,0 +1,299 @@
+<section class="page" aria-labelledby="pos-title">
+  <header class="page__header">
+    <div>
+      <h1 id="pos-title">Punto de venta</h1>
+      <p>Precios, impuestos y stock se recalculan en el servidor al confirmar la venta.</p>
+    </div>
+    <div class="page__actions">
+      @if (session(); as active) {
+        <span class="state-box state-box--success">✅ Caja abierta: {{ active.registerName || 'Sesión activa' }}</span>
+      }
+    </div>
+  </header>
+
+  @if (!sessionChecked()) {
+    <p class="state-box state-box--info" role="status">Verificando la sesión de caja…</p>
+  } @else if (!session()) {
+    <div class="state-box state-box--warning" role="alert">
+      <span>No hay una sesión de caja abierta. Abre caja antes de registrar ventas.</span>
+      <a class="btn btn-sm btn-danger state-box__action" routerLink="/caja">Ir a caja</a>
+    </div>
+  }
+
+  <div class="pos-layout">
+    <section class="mega-card" aria-label="Catálogo de productos">
+      <div class="toolbar mb-3">
+        <div class="toolbar__grow">
+          <mega-input
+            label="Buscar producto"
+            type="search"
+            placeholder="Nombre, SKU o descripción"
+            name="pos-search"
+            [ngModel]="query()"
+            (ngModelChange)="onSearch($event)"
+          />
+        </div>
+        <div style="min-width: 190px">
+          <mega-input
+            label="Código de barras"
+            placeholder="Escanea y pulsa Enter"
+            name="pos-barcode"
+            inputmode="numeric"
+            [ngModel]="barcode()"
+            (ngModelChange)="barcode.set($event)"
+            (keydown.enter)="onBarcode(barcode()); $event.preventDefault()"
+          />
+        </div>
+        <div style="min-width: 210px">
+          <mega-select
+            label="Categoría"
+            name="pos-category"
+            [options]="categoryOptions()"
+            [ngModel]="categoryId()"
+            (ngModelChange)="onCategoryChange($event)"
+          />
+        </div>
+      </div>
+
+      @if (productsLoading()) {
+        <div class="product-grid" aria-busy="true">
+          @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+            <mega-skeleton variant="block" height="170px" width="100%" label="Cargando producto" />
+          }
+        </div>
+      } @else if (!products().length) {
+        <mega-empty-state
+          icon="🔍"
+          title="Sin productos"
+          message="Ajusta la búsqueda o el filtro de categoría para ver resultados."
+        />
+      } @else {
+        <div class="product-grid">
+          @for (product of products(); track product.id) {
+            <mega-product-card
+              [name]="product.name"
+              [sku]="product.sku"
+              [imageUrl]="primaryUrl(product)"
+              [price]="firstPrice(product)"
+              actionText="Agregar"
+              [clickable]="true"
+              (view)="addToCart(product)"
+              (action)="addToCart(product)"
+            />
+          }
+        </div>
+      }
+    </section>
+
+    <section class="mega-card" aria-label="Carrito de compra">
+      <div class="mega-card__header">
+        <h2 class="mega-card__title">Carrito ({{ cart().length }})</h2>
+        @if (cart().length) {
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearCart()">
+            Vaciar
+          </button>
+        }
+      </div>
+
+      @if (!cart().length) {
+        <mega-empty-state
+          icon="🛒"
+          title="Carrito vacío"
+          message="Busca un producto o escanea su código de barras para comenzar."
+        />
+      } @else {
+        <div class="cart-list">
+          @for (line of cart(); track line.variantId) {
+            <article class="cart-item">
+              <div>
+                <p class="cart-item__name">{{ line.name }}</p>
+                <p class="cart-item__sku">{{ line.sku }} · {{ money(line.unitPrice) }} c/u</p>
+              </div>
+              <button
+                type="button"
+                class="btn btn-sm btn-link text-danger p-0"
+                (click)="removeLine(line.variantId)"
+                [attr.aria-label]="'Quitar ' + line.name + ' del carrito'"
+              >
+                ✕
+              </button>
+
+              <div class="cart-item__controls">
+                <div class="field cart-item__qty">
+                  <label class="admin-label" [for]="'qty-' + line.variantId">Cantidad</label>
+                  <input
+                    class="admin-control"
+                    type="number"
+                    min="1"
+                    step="1"
+                    [id]="'qty-' + line.variantId"
+                    [value]="line.quantity"
+                    (change)="setQuantity(line.variantId, $any($event.target).value)"
+                  />
+                </div>
+                <div class="field cart-item__discount">
+                  <label class="admin-label" [for]="'disc-' + line.variantId">Descuento</label>
+                  <input
+                    class="admin-control"
+                    type="text"
+                    inputmode="decimal"
+                    [id]="'disc-' + line.variantId"
+                    [value]="line.discount"
+                    (change)="setDiscount(line.variantId, $any($event.target).value)"
+                  />
+                </div>
+                <span class="cart-item__total">{{ money(lineTotal(line)) }}</span>
+              </div>
+            </article>
+          }
+        </div>
+
+        <div class="cart-summary">
+          <div class="cart-summary__row">
+            <span>Subtotal</span>
+            <strong>{{ money(subtotal()) }}</strong>
+          </div>
+          <div class="cart-summary__row">
+            <span>Descuentos</span>
+            <strong>-{{ money(discountTotal()) }}</strong>
+          </div>
+          @if (taxRate() !== null) {
+            <div class="cart-summary__row">
+              <span>IVA estimado ({{ ((taxRate() ?? 0) * 100).toFixed(0) }}%)</span>
+              <strong>{{ money(estimatedTax()) }}</strong>
+            </div>
+          } @else {
+            <div class="cart-summary__row">
+              <span>IVA</span>
+              <strong>Se calcula al confirmar</strong>
+            </div>
+          }
+          <div class="cart-summary__row cart-summary__row--total">
+            <span>Total</span>
+            <strong>{{ money(estimatedTotal()) }}</strong>
+          </div>
+        </div>
+
+        <div class="mega-form-grid mt-3">
+          <div class="field">
+            <mega-select
+              label="Medio de pago"
+              name="pos-method"
+              [options]="methodOptions"
+              [ngModel]="paymentMethod()"
+              (ngModelChange)="paymentMethod.set($event)"
+            />
+          </div>
+          <div class="field">
+            <mega-currency-input
+              label="Monto a cobrar"
+              name="pos-amount"
+              [ngModel]="paymentAmount()"
+              (ngModelChange)="paymentAmount.set($event)"
+            />
+          </div>
+          <div class="field">
+            <mega-input
+              label="Referencia (opcional)"
+              name="pos-reference"
+              placeholder="N.º de comprobante o últimos 4 dígitos"
+              [ngModel]="paymentReference()"
+              (ngModelChange)="paymentReference.set($event)"
+            />
+          </div>
+          <div class="field">
+            <span class="admin-label">Comprobante</span>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="pos-invoice"
+                [checked]="requestInvoice()"
+                (change)="requestInvoice.set($any($event.target).checked)"
+              />
+              <label class="form-check-label" for="pos-invoice">Solicitar factura electrónica</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <mega-button
+            [loading]="charging()"
+            [disabled]="!session()"
+            (click)="cobrar()"
+            aria-label="Cobrar venta"
+          >
+            💳 Cobrar {{ money(estimatedTotal()) }}
+          </mega-button>
+          <span class="admin-hint align-self-center">
+            El servidor valida stock, precios e impuestos; el pago debe cubrir el total final.
+          </span>
+        </div>
+      }
+    </section>
+  </div>
+</section>
+
+<mega-modal
+  [open]="!!variantPicker()"
+  [title]="'Elegir variante — ' + (variantPicker()?.name ?? '')"
+  size="md"
+  (close)="variantPicker.set(null)"
+>
+  @if (variantPicker(); as picker) {
+    <div class="list-group-mega">
+      @for (variant of picker.variants; track variant.sku) {
+        <div class="list-group-mega__item">
+          <span class="mono">{{ variant.sku }}</span>
+          @if (variant.barcode) {
+            <span class="text-muted-mega">· {{ variant.barcode }}</span>
+          }
+          <span class="toolbar__spacer"></span>
+          <strong>{{ money(variant.salePrice) }}</strong>
+          <button type="button" class="btn btn-sm btn-danger" (click)="pickVariant(variant)">
+            Agregar
+          </button>
+        </div>
+      }
+    </div>
+  }
+</mega-modal>
+
+<mega-modal
+  [open]="!!result()"
+  title="Venta confirmada"
+  size="sm"
+  [backdropClose]="false"
+  (close)="result.set(null)"
+>
+  @if (result(); as sale) {
+    <dl class="detail-grid">
+      <div>
+        <dt>Número de venta</dt>
+        <dd class="mono">{{ sale.saleNumber }}</dd>
+      </div>
+      <div>
+        <dt>Estado</dt>
+        <dd>{{ sale.status }}</dd>
+      </div>
+      <div>
+        <dt>Total</dt>
+        <dd>{{ money(sale.grandTotal) }}</dd>
+      </div>
+      <div>
+        <dt>Impuestos</dt>
+        <dd>{{ money(sale.taxTotal) }}</dd>
+      </div>
+      <div>
+        <dt>Factura</dt>
+        <dd>{{ sale.invoiceStatus || 'No solicitada' }}</dd>
+      </div>
+    </dl>
+  }
+  <div class="d-flex justify-content-end gap-2" megaModalFooter>
+    <button type="button" class="btn btn-outline-secondary" (click)="result.set(null)">
+      Cerrar
+    </button>
+    <button type="button" class="btn btn-danger" (click)="printTicket()">🖨️ Imprimir ticket</button>
+  </div>
+</mega-modal>

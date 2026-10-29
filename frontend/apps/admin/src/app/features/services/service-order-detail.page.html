@@ -1,0 +1,278 @@
+<section class="page" aria-labelledby="order-detail-title">
+  <header class="page__header">
+    <div>
+      <p class="page__breadcrumb">
+        <a routerLink="/servicios/ordenes">Órdenes</a> / Detalle
+      </p>
+      <h1 id="order-detail-title">
+        Orden {{ order()?.orderNumber ?? '…' }}
+      </h1>
+    </div>
+    <div class="page__actions">
+      @if (order(); as current) {
+        @if (allowedTransitions().length) {
+          <mega-button size="sm" variant="secondary" (click)="openStatusModal()">
+            Cambiar estado
+          </mega-button>
+        }
+        <mega-button size="sm" (click)="openAdvanceModal()">Registrar anticipo</mega-button>
+        <mega-button size="sm" variant="danger" (click)="openChargeModal()">
+          Cobrar saldo
+        </mega-button>
+      }
+    </div>
+  </header>
+
+  @if (loading() && !order()) {
+    <div class="state-box state-box--info" role="status">Cargando orden…</div>
+  } @else if (order(); as current) {
+    <div class="mega-card">
+      <dl class="detail-grid">
+        <div>
+          <dt>Cliente</dt>
+          <dd>{{ current.customerName || current.customerId }}</dd>
+        </div>
+        <div>
+          <dt>Vehículo</dt>
+          <dd>{{ current.vehicleDescription || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Tipo</dt>
+          <dd>{{ typeLabel(current.serviceType) }}</dd>
+        </div>
+        <div>
+          <dt>Estado</dt>
+          <dd>
+            <mega-status-badge
+              [status]="current.status"
+              [customLabels]="statusLabels"
+              [customTones]="statusTones"
+            />
+          </dd>
+        </div>
+        <div>
+          <dt>Mano de obra</dt>
+          <dd>{{ money(current.laborAmount) }}</dd>
+        </div>
+        <div>
+          <dt>Total estimado</dt>
+          <dd>{{ money(current.estimatedTotal) }}</dd>
+        </div>
+        <div>
+          <dt>Anticipos</dt>
+          <dd>{{ money(current.paidAdvances) }}</dd>
+        </div>
+        <div>
+          <dt>Saldo restante</dt>
+          <dd><strong>{{ money(current.remainingBalance) }}</strong></dd>
+        </div>
+        <div>
+          <dt>Programada</dt>
+          <dd>{{ dateTime(current.scheduledAt) }}</dd>
+        </div>
+      </dl>
+      <p class="mt-2">{{ current.description }}</p>
+      @if (current.dimensions) {
+        <p class="admin-hint">Dimensiones: {{ current.dimensions }}</p>
+      }
+    </div>
+
+    <div class="mega-card">
+      <h2 class="section-title">Materiales</h2>
+      @if (!current.materials?.length) {
+        <p class="text-muted-mega">Sin materiales planificados.</p>
+      } @else {
+        <div class="table-responsive">
+          <table class="table admin-table">
+            <thead>
+              <tr>
+                <th scope="col">Material</th>
+                <th scope="col" class="text-end">Planificado</th>
+                <th scope="col" class="text-end">Consumido</th>
+                <th scope="col" style="width: 120px">Cantidad</th>
+                <th scope="col" style="width: 220px">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (material of current.materials; track material.id) {
+                <tr>
+                  <td>
+                    {{ material.productName || material.sku || material.variantId.slice(0, 8) + '…' }}
+                  </td>
+                  <td class="text-end mono">{{ num(material.plannedQuantity) }}</td>
+                  <td class="text-end mono">{{ num(material.consumedQuantity) }}</td>
+                  <td>
+                    <input
+                      class="form-control form-control-sm"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      [ngModel]="materialQty()[material.id] ?? '1'"
+                      [ngModelOptions]="{ standalone: true }"
+                      (ngModelChange)="setMaterialQty(material.id, $event)"
+                      [attr.aria-label]="'Cantidad de ' + (material.productName || material.sku)"
+                    />
+                  </td>
+                  <td>
+                    <div class="cell-actions">
+                      <mega-button
+                        size="sm"
+                        variant="outline"
+                        [loading]="materialBusy()"
+                        (click)="consume(material.id)"
+                      >
+                        Consumir
+                      </mega-button>
+                      <mega-button
+                        size="sm"
+                        variant="ghost"
+                        [loading]="materialBusy()"
+                        (click)="returnMaterial(material.id)"
+                      >
+                        Devolver
+                      </mega-button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <div class="mega-card">
+      <h2 class="section-title">Adjuntos (diseños)</h2>
+      <mega-uploader
+        label="Adjuntar archivo"
+        hint="Imágenes o PDF (máx. 8 MB)"
+        (filesSelected)="onFilesSelected($event)"
+      />
+      @if (uploading()) {
+        <p class="state-box state-box--info mt-2" role="status">Subiendo…</p>
+      }
+      <div class="list-group-mega mt-3">
+        @for (attachment of current.attachments; track attachment.mediaId) {
+          <div class="list-group-mega__item">
+            <span>{{ attachment.originalName || attachment.mediaId.slice(0, 8) + '…' }}</span>
+            <span class="toolbar__spacer"></span>
+            @if (attachment.url) {
+              <a class="btn btn-sm btn-outline-secondary" [href]="attachment.url" target="_blank" rel="noopener">
+                Abrir
+              </a>
+            }
+            <mega-button size="sm" variant="ghost" (click)="removeAttachment(attachment.mediaId)">
+              Quitar
+            </mega-button>
+          </div>
+        } @empty {
+          <div class="list-group-mega__item text-muted-mega">Sin adjuntos.</div>
+        }
+      </div>
+    </div>
+
+    <div class="mega-card">
+      <h2 class="section-title">Historial de estados</h2>
+      <div class="list-group-mega">
+        @for (entry of current.statusHistory; track entry.id) {
+          <div class="list-group-mega__item">
+            <strong>{{ transitionLabel(entry.newStatus) }}</strong>
+            <span class="text-muted-mega">{{ dateTime(entry.changedAt) }}</span>
+            <span class="toolbar__spacer"></span>
+            <span>{{ entry.notes || '' }}</span>
+          </div>
+        } @empty {
+          <div class="list-group-mega__item text-muted-mega">Sin cambios registrados.</div>
+        }
+      </div>
+    </div>
+  }
+</section>
+
+<mega-modal [open]="statusModal()" title="Cambiar estado" (close)="statusModal.set(false)">
+  <form class="d-grid gap-3" (ngSubmit)="submitStatus()">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+    <mega-select
+      label="Nuevo estado"
+      name="next-status"
+      [options]="
+        allowedTransitions().map((code) => ({ value: code, label: transitionLabel(code) }))
+      "
+      [ngModel]="nextStatus()"
+      (ngModelChange)="nextStatus.set($event)"
+    />
+    <mega-textarea
+      label="Notas del cambio (opcional)"
+      name="status-notes"
+      [rows]="2"
+      [ngModel]="statusNotes()"
+      (ngModelChange)="statusNotes.set($event)"
+    />
+  </form>
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="statusModal.set(false)">Cancelar</mega-button>
+    <mega-button (click)="submitStatus()" [loading]="statusSubmitting()">Confirmar</mega-button>
+  </div>
+</mega-modal>
+
+<mega-modal [open]="advanceModal()" title="Registrar anticipo" (close)="advanceModal.set(false)">
+  <form class="d-grid gap-3" (ngSubmit)="submitAdvance()">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+    <mega-select
+      label="Medio de pago"
+      name="advance-method"
+      [options]="payOptions"
+      [ngModel]="advanceMethod()"
+      (ngModelChange)="advanceMethod.set($event)"
+    />
+    <mega-input
+      label="Monto del anticipo (USD)"
+      name="advance-amount"
+      type="number"
+      [ngModel]="advanceAmount()"
+      (ngModelChange)="advanceAmount.set($event)"
+    />
+    <mega-input
+      label="Referencia (opcional)"
+      name="advance-reference"
+      [ngModel]="advanceReference()"
+      (ngModelChange)="advanceReference.set($event)"
+    />
+  </form>
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="advanceModal.set(false)">Cancelar</mega-button>
+    <mega-button (click)="submitAdvance()" [loading]="advanceSubmitting()">Registrar</mega-button>
+  </div>
+</mega-modal>
+
+<mega-modal [open]="chargeModal()" title="Cobrar saldo" (close)="chargeModal.set(false)">
+  <form class="d-grid gap-3" (ngSubmit)="submitCharge()">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+    <mega-select
+      label="Medio de pago"
+      name="charge-method"
+      [options]="payOptions"
+      [ngModel]="chargeMethod()"
+      (ngModelChange)="chargeMethod.set($event)"
+    />
+    <mega-input
+      label="Monto a cobrar (USD)"
+      name="charge-amount"
+      type="number"
+      [ngModel]="chargeAmount()"
+      (ngModelChange)="chargeAmount.set($event)"
+    />
+    <mega-input
+      label="Referencia (opcional)"
+      name="charge-reference"
+      [ngModel]="chargeReference()"
+      (ngModelChange)="chargeReference.set($event)"
+    />
+  </form>
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="chargeModal.set(false)">Cancelar</mega-button>
+    <mega-button variant="danger" (click)="submitCharge()" [loading]="chargeSubmitting()">
+      Cobrar
+    </mega-button>
+  </div>
+</mega-modal>

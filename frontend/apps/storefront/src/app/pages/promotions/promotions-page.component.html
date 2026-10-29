@@ -1,0 +1,69 @@
+<section class="store-page-hero">
+  <div class="store-container">
+    <h1 class="store-page-hero__title">Promociones vigentes</h1>
+    <p class="store-page-hero__lead">
+      Ofertas activas en productos y servicios. Precios en USD, sujetos a disponibilidad.
+    </p>
+  </div>
+</section>
+
+<section class="store-section">
+  <div class="store-container">
+    @if (loading()) {
+      <div class="store-grid-cards" aria-busy="true">
+        @for (item of [1, 2, 3]; track item) {
+          <div class="store-card promotions-skeleton-card">
+            <mega-skeleton variant="text" [lines]="4" label="Cargando promoción" />
+          </div>
+        }
+      </div>
+    } @else if (error()) {
+      <div class="store-state" role="alert">
+        <span class="store-state__icon" aria-hidden="true">⚠️</span>
+        <p class="store-state__title">No pudimos cargar las promociones</p>
+        <p class="store-state__message">
+          Intenta de nuevo en unos segundos o pregúntanos directo por WhatsApp.
+        </p>
+        <button
+          type="button"
+          class="store-btn store-btn--primary store-state__action"
+          (click)="load()"
+        >
+          Reintentar
+        </button>
+      </div>
+    } @else if (promotions().length === 0) {
+      <mega-empty-state
+        icon="🎉"
+        title="Sin promociones activas"
+        message="Por ahora no hay ofertas publicadas. Explora el catálogo: tenemos novedades cada semana."
+        actionLabel="Ir al catálogo"
+      />
+      <div class="promotions-empty-cta">
+        <a class="store-btn store-btn--primary" routerLink="/catalogo">Ver catálogo</a>
+      </div>
+    } @else {
+      <div class="store-grid-cards">
+        @for (promo of promotions(); track promo.id) {
+          <article class="store-card promotions-card">
+            <span class="promotions-card__badge">{{ discountLabel(promo) }}</span>
+            <h2 class="promotions-card__title">{{ promo.name }}</h2>
+            @if (promo.description) {
+              <p class="promotions-card__text">{{ promo.description }}</p>
+            }
+            <p class="promotions-card__validity">
+              <span aria-hidden="true">📅</span> {{ validityLabel(promo) }}
+            </p>
+            <a
+              class="store-btn store-btn--primary"
+              [href]="whatsappUrl()"
+              target="_blank"
+              rel="noopener"
+              >Consultar por WhatsApp</a
+            >
+          </article>
+        }
+      </div>
+    }
+  </div>
+</section>

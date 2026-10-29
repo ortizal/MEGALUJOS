@@ -1,0 +1,215 @@
+﻿<section class="page" aria-labelledby="cash-detail-title">
+  <header class="page__header">
+    <div>
+      <p class="page__breadcrumb">
+        <a routerLink="/caja">Caja</a> / Detalle
+      </p>
+      <h1 id="cash-detail-title">Detalle de sesión</h1>
+    </div>
+    <div class="page__actions">
+      <mega-button variant="outline" size="sm" (click)="printClosing()">🖨️ Imprimir cierre</mega-button>
+      @if (isOpen) {
+        <mega-button variant="danger" size="sm" (click)="openCloseModal()">Cerrar caja</mega-button>
+      }
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <mega-empty-state
+      icon="⚠️"
+      title="No pudimos cargar la sesión"
+      [message]="message"
+      actionLabel="Reintentar"
+      (action)="load()"
+    />
+  } @else if (session(); as session) {
+    <div class="mega-card">
+      <dl class="detail-grid">
+        <div>
+          <dt>Caja</dt>
+          <dd>{{ session.registerName || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Estado</dt>
+          <dd><mega-status-badge [status]="session.status" /></dd>
+        </div>
+        <div>
+          <dt>Apertura</dt>
+          <dd>{{ session.openedAt }}</dd>
+        </div>
+        <div>
+          <dt>Cierre</dt>
+          <dd>{{ session.closedAt || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Fondo inicial</dt>
+          <dd>{{ money(session.openingAmount) }}</dd>
+        </div>
+        <div>
+          <dt>Efectivo contado</dt>
+          <dd>{{ session.countedAmount ? money(session.countedAmount) : '—' }}</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="mega-card">
+      <h2 class="section-title">Arqueo por medio de pago</h2>
+      @if (reconciliation(); as recon) {
+        <mega-cash-summary
+          title="Totales"
+          [items]="[
+            { label: 'Fondo inicial', value: money(recon.openingAmount) },
+            { label: 'Esperado', value: money(recon.totalExpected) },
+            { label: 'Contado', value: recon.totalCounted ? money(recon.totalCounted) : '—' }
+          ]"
+          [differenceValue]="recon.totalDifference ? money(recon.totalDifference) : '—'"
+          [differenceTone]="differenceTone(recon.totalDifference)"
+        />
+
+        <div class="table-responsive mt-3">
+          <table class="table admin-table">
+            <thead>
+              <tr>
+                <th scope="col">Medio de pago</th>
+                <th scope="col" class="text-end">Esperado</th>
+                <th scope="col" class="text-end" style="width: 160px">Contado</th>
+                <th scope="col" class="text-end">Diferencia</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of recon.items ?? recon.lines; track line.method) {
+                <tr>
+                  <td>{{ methodLabel(line.method) }}</td>
+                  <td class="text-end mono">{{ num(line.expected) }}</td>
+                  <td class="text-end">
+                    @if (isOpen) {
+                      <input
+                        class="form-control form-control-sm text-end"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        [ngModel]="line.counted ?? ''"
+                        [ngModelOptions]="{ standalone: true }"
+                        (ngModelChange)="setCounted(line.method, $event)"
+                        [attr.aria-label]="'Contado de ' + methodLabel(line.method)"
+                      />
+                    } @else {
+                      <span class="mono">{{ num(line.counted) }}</span>
+                    }
+                  </td>
+                  <td class="text-end mono">{{ num(line.difference) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (isOpen) {
+          <div class="d-flex justify-content-end mt-2">
+            <mega-button variant="secondary" size="sm" (click)="saveCounts()">
+              Guardar conteos
+            </mega-button>
+          </div>
+        }
+      } @else {
+        <p class="state-box state-box--info" role="status">Cargando arqueo…</p>
+      }
+    </div>
+
+    <div class="mega-card">
+      <h2 class="section-title">Movimientos de la sesión</h2>
+
+      @if (isOpen) {
+        <form class="toolbar toolbar--wrap" (ngSubmit)="addMovement()">
+          <div style="min-width: 180px">
+            <mega-select
+              label="Tipo"
+              name="movement-type"
+              [options]="methodOptions"
+              [ngModel]="movementType()"
+              (ngModelChange)="movementType.set($event)"
+            />
+          </div>
+          <div style="min-width: 140px">
+            <mega-input
+              label="Monto (USD)"
+              name="movement-amount"
+              type="number"
+              [ngModel]="movementAmount()"
+              (ngModelChange)="movementAmount.set($event)"
+            />
+          </div>
+          <div class="toolbar__grow">
+            <mega-input
+              label="Motivo"
+              name="movement-reason"
+              placeholder="Ej. Pago de papelería"
+              [ngModel]="movementReason()"
+              (ngModelChange)="movementReason.set($event)"
+            />
+          </div>
+          <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+          <mega-button (click)="addMovement()" [loading]="movementSubmitting()" size="sm">
+            Registrar
+          </mega-button>
+        </form>
+      }
+
+      <div class="table-responsive">
+        <table class="table admin-table">
+          <thead>
+            <tr>
+              <th scope="col">Fecha</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Motivo</th>
+              <th scope="col" class="text-end">Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (movement of movements(); track movement.id) {
+              <tr>
+                <td>{{ movement.createdAt }}</td>
+                <td>{{ movementLabel(movement.movementType) }}</td>
+                <td>{{ movement.reason || '—' }}</td>
+                <td class="text-end mono">{{ money(movement.amount) }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="text-center text-muted-mega">Sin movimientos registrados.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</section>
+
+<mega-modal [open]="closeModal()" title="Cerrar caja" (close)="closeModal.set(false)">
+  <form class="d-grid gap-3" (ngSubmit)="closeSession()">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+    <mega-input
+      label="Efectivo contado (USD)"
+      name="close-counted"
+      type="number"
+      [ngModel]="countedAmount()"
+      (ngModelChange)="countedAmount.set($event)"
+    />
+    <mega-textarea
+      label="Notas de cierre (opcional)"
+      name="close-notes"
+      [rows]="2"
+      [ngModel]="closeNotes()"
+      (ngModelChange)="closeNotes.set($event)"
+    />
+  </form>
+  <p class="admin-hint mt-2">
+    El servidor calculará el esperado por medio de pago y la diferencia final.
+  </p>
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="closeModal.set(false)">Cancelar</mega-button>
+    <mega-button variant="danger" (click)="closeSession()" [loading]="closeSubmitting()">
+      Confirmar cierre
+    </mega-button>
+  </div>
+</mega-modal>

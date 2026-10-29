@@ -1,0 +1,139 @@
+.mega-confirm-host {
+  display: contents;
+}
+
+.mega-confirm__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(17, 19, 24, 0.55);
+  animation: mega-confirm-fade var(--mega-duration-fast, 140ms) ease;
+}
+
+.mega-confirm__wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  pointer-events: none;
+}
+
+.mega-confirm {
+  pointer-events: auto;
+  width: min(26rem, 100%);
+  background: var(--mega-surface, #fff);
+  border: 1px solid var(--mega-border, #dde2e7);
+  border-radius: var(--mega-radius, 16px);
+  box-shadow: var(--mega-shadow-lg, 0 24px 48px rgba(17, 19, 24, 0.18));
+  padding: 1.35rem;
+  text-align: center;
+  animation: mega-confirm-pop var(--mega-duration-base, 200ms) var(--mega-ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.mega-confirm__icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.mega-confirm__title {
+  margin: 0.65rem 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--mega-text, #22262c);
+}
+
+.mega-confirm__message {
+  margin: 0;
+  font-size: 0.925rem;
+  line-height: 1.5;
+  color: var(--mega-text-secondary, #5b636d);
+}
+
+.mega-confirm__actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.6rem;
+  margin-top: 1.15rem;
+}
+
+.mega-confirm__cancel,
+.mega-confirm__accept {
+  font-family: var(--mega-font, 'Inter', sans-serif);
+  font-weight: 600;
+  font-size: 0.925rem;
+  border-radius: var(--mega-radius-sm, 12px);
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: background-color var(--mega-duration-fast, 140ms) var(--mega-ease, ease),
+    border-color var(--mega-duration-fast, 140ms) var(--mega-ease, ease),
+    color var(--mega-duration-fast, 140ms) var(--mega-ease, ease);
+
+  &:focus-visible {
+    outline: 2px solid var(--mega-red, #d71920);
+    outline-offset: 2px;
+  }
+}
+
+.mega-confirm__cancel {
+  background: transparent;
+  border: 1px solid var(--mega-border, #dde2e7);
+  color: var(--mega-text, #22262c);
+
+  &:hover {
+    background: var(--mega-surface-alt, #eef1f4);
+  }
+}
+
+.mega-confirm__accept {
+  background: var(--mega-carbon, #1b1f25);
+  border: 1px solid var(--mega-carbon, #1b1f25);
+  color: var(--mega-white, #fff);
+
+  &:hover {
+    background: var(--mega-black, #111318);
+  }
+
+  &--danger {
+    background: var(--mega-red, #d71920);
+    border-color: var(--mega-red, #d71920);
+
+    &:hover {
+      background: var(--mega-red-hover, #b9141a);
+    }
+  }
+}
+
+@keyframes mega-confirm-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes mega-confirm-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+
+@media (min-width: 480px) {
+  .mega-confirm__actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .mega-confirm__cancel,
+  .mega-confirm__accept {
+    min-width: 7.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mega-confirm__backdrop,
+  .mega-confirm {
+    animation: none;
+  }
+}

@@ -1,0 +1,54 @@
+<section class="page" aria-labelledby="agenda-title">
+  <header class="page__header">
+    <div>
+      <h1 id="agenda-title">Agenda de servicios</h1>
+      <p>Órdenes programadas agrupadas por día.</p>
+    </div>
+    <div class="page__actions">
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/servicios/ordenes">Ver todas</a>
+      <mega-button variant="outline" size="sm" (click)="load()">Recargar</mega-button>
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <mega-empty-state
+      icon="⚠️"
+      title="No pudimos cargar la agenda"
+      [message]="message"
+      actionLabel="Reintentar"
+      (action)="load()"
+    />
+  } @else if (!loading() && !days().length) {
+    <mega-empty-state
+      icon="🗓️"
+      title="Agenda libre"
+      message="No hay órdenes programadas. Programa una orden desde su detalle."
+    />
+  } @else {
+    @for (day of days(); track day.date) {
+      <div class="mega-card">
+        <h2 class="section-title">{{ formatDate(day.date) }}</h2>
+        @if (!day.orders?.length) {
+          <p class="text-muted-mega">Sin órdenes para este día.</p>
+        } @else {
+          <div class="list-group-mega">
+            @for (order of day.orders; track order.id) {
+              <a class="list-group-mega__item agenda-item" [routerLink]="['/servicios/ordenes', order.id]">
+                <strong class="mono">{{ order.orderNumber }}</strong>
+                <span>{{ order.customerName || 'Cliente' }}</span>
+                <span class="text-muted-mega">{{ order.description }}</span>
+                <span class="toolbar__spacer"></span>
+                <mega-status-badge
+                  [status]="order.status"
+                  [customLabels]="statusLabels"
+                  [customTones]="statusTones"
+                />
+                <strong>{{ money(order.estimatedTotal) }}</strong>
+              </a>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</section>

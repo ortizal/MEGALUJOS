@@ -1,0 +1,257 @@
+<section class="page" aria-labelledby="reports-title">
+  <header class="page__header">
+    <div>
+      <h1 id="reports-title">Reportes</h1>
+      <p>Ventas, márgenes, impuestos y operación en un rango de fechas.</p>
+    </div>
+    <div class="page__actions">
+      <mega-button [loading]="loading()" (click)="load()">Generar reportes</mega-button>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <form class="toolbar" (ngSubmit)="load()" aria-label="Rango de fechas">
+      <div style="min-width: 160px">
+        <mega-date-picker
+          label="Desde"
+          name="reports-from"
+          [ngModel]="dateFrom()"
+          (ngModelChange)="dateFrom.set($event)"
+        />
+      </div>
+      <div style="min-width: 160px">
+        <mega-date-picker
+          label="Hasta"
+          name="reports-to"
+          [ngModel]="dateTo()"
+          (ngModelChange)="dateTo.set($event)"
+        />
+      </div>
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="load()" [loading]="loading()" size="sm">Aplicar</mega-button>
+    </form>
+  </div>
+
+  @if (!loaded() && !loading()) {
+    <mega-empty-state
+      icon="📊"
+      title="Genera tus reportes"
+      message="Elige un rango de fechas y pulsa «Generar reportes»."
+      actionLabel="Generar ahora"
+      (action)="load()"
+    />
+  } @else {
+    <div class="mega-card">
+      <div class="d-flex justify-content-between align-items-center">
+        <h2 class="section-title mb-0">Ventas por día</h2>
+        <div class="d-flex gap-2">
+          <span class="admin-hint">Total: {{ totalOf(dailySales()) }}</span>
+          <mega-button size="sm" variant="outline" (click)="exportDailySales()">CSV</mega-button>
+        </div>
+      </div>
+      <div class="table-responsive mt-3">
+        <table class="table admin-table">
+          <thead>
+            <tr>
+              <th scope="col">Fecha</th>
+              <th scope="col" class="text-end">Ventas</th>
+              <th scope="col" class="text-end">Subtotal</th>
+              <th scope="col" class="text-end">Impuestos</th>
+              <th scope="col" class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of dailySales(); track row.date) {
+              <tr>
+                <td>{{ row.date }}</td>
+                <td class="text-end mono">{{ row.count }}</td>
+                <td class="text-end mono">{{ money(row.subtotal) }}</td>
+                <td class="text-end mono">{{ money(row.taxTotal) }}</td>
+                <td class="text-end mono"><strong>{{ money(row.total) }}</strong></td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="text-center text-muted-mega">Sin ventas en el rango.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mega-card">
+      <div class="d-flex justify-content-between align-items-center">
+        <h2 class="section-title mb-0">Productos más vendidos</h2>
+        <mega-button size="sm" variant="outline" (click)="exportPopular()">CSV</mega-button>
+      </div>
+      <div class="table-responsive mt-3">
+        <table class="table admin-table">
+          <thead>
+            <tr>
+              <th scope="col">Producto</th>
+              <th scope="col" class="text-end">Cantidad</th>
+              <th scope="col" class="text-end">Ingresos</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of popular(); track row.productName) {
+              <tr>
+                <td>{{ row.productName }}</td>
+                <td class="text-end mono">{{ num(row.quantitySold) }}</td>
+                <td class="text-end mono">{{ money(row.totalRevenue) }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3" class="text-center text-muted-mega">Sin datos.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="report-grid">
+      <div class="mega-card">
+        <h2 class="section-title">Ventas por categoría</h2>
+        <div class="table-responsive">
+          <table class="table admin-table">
+            <thead>
+              <tr>
+                <th scope="col">Categoría</th>
+                <th scope="col" class="text-end">Ventas</th>
+                <th scope="col" class="text-end">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of byCategory(); track row.category) {
+                <tr>
+                  <td>{{ row.category }}</td>
+                  <td class="text-end mono">{{ row.count }}</td>
+                  <td class="text-end mono">{{ money(row.total) }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="text-center text-muted-mega">Sin datos.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mega-card">
+        <h2 class="section-title">Impuestos</h2>
+        <div class="table-responsive">
+          <table class="table admin-table">
+            <thead>
+              <tr>
+                <th scope="col">Código</th>
+                <th scope="col" class="text-end">Base</th>
+                <th scope="col" class="text-end">Impuesto</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of taxSummary(); track row.taxCode) {
+                <tr>
+                  <td class="mono">{{ row.taxCode }}</td>
+                  <td class="text-end mono">{{ money(row.taxableAmount) }}</td>
+                  <td class="text-end mono">{{ money(row.taxAmount) }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="text-center text-muted-mega">Sin datos.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mega-card">
+        <h2 class="section-title">Márgenes estimados</h2>
+        <div class="table-responsive">
+          <table class="table admin-table">
+            <thead>
+              <tr>
+                <th scope="col">Producto</th>
+                <th scope="col" class="text-end">Cant.</th>
+                <th scope="col" class="text-end">Margen</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of margin(); track row.sku) {
+                <tr>
+                  <td>{{ row.productName }}</td>
+                  <td class="text-end mono">{{ num(row.quantity) }}</td>
+                  <td class="text-end mono">{{ money(row.margin) }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="text-center text-muted-mega">Sin datos.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mega-card">
+        <h2 class="section-title">Órdenes de servicio</h2>
+        <div class="table-responsive">
+          <table class="table admin-table">
+            <thead>
+              <tr>
+                <th scope="col">Estado</th>
+                <th scope="col" class="text-end">Órdenes</th>
+                <th scope="col" class="text-end">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of serviceStatus(); track row.status) {
+                <tr>
+                  <td>{{ row.status }}</td>
+                  <td class="text-end mono">{{ row.count }}</td>
+                  <td class="text-end mono">{{ money(row.total) }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="text-center text-muted-mega">Sin datos.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mega-card">
+        <h2 class="section-title">Cierres de caja</h2>
+        <div class="table-responsive">
+          <table class="table admin-table">
+            <thead>
+              <tr>
+                <th scope="col">Apertura</th>
+                <th scope="col">Cierre</th>
+                <th scope="col" class="text-end">Esperado</th>
+                <th scope="col" class="text-end">Diferencia</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of cashClosings(); track row.sessionId) {
+                <tr>
+                  <td>{{ row.openedAt || '—' }}</td>
+                  <td>{{ row.closedAt || '—' }}</td>
+                  <td class="text-end mono">{{ money(row.expectedAmount) }}</td>
+                  <td class="text-end mono">{{ money(row.difference) }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="text-center text-muted-mega">Sin cierres en el rango.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+</section>

@@ -1,0 +1,134 @@
+<section class="page" aria-labelledby="invoicing-config-title">
+  <header class="page__header">
+    <div>
+      <h1 id="invoicing-config-title">Configuración SRI</h1>
+      <p>Resumen del emisor, ambiente y reglas fiscales vigentes.</p>
+    </div>
+    <div class="page__actions">
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/facturacion/emisores">
+        Editar emisor
+      </a>
+      <mega-button variant="outline" size="sm" (click)="load()">Recargar</mega-button>
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <mega-empty-state
+      icon="⚠️"
+      title="No pudimos cargar la configuración"
+      [message]="message"
+      actionLabel="Reintentar"
+      (action)="load()"
+    />
+  } @else if (loading()) {
+    <div class="state-box state-box--info" role="status">Cargando configuración…</div>
+  } @else if (config(); as cfg) {
+    <div class="mega-card">
+      <h2 class="section-title">Emisor</h2>
+      @if (cfg.issuer; as issuer) {
+        <dl class="detail-grid">
+          <div>
+            <dt>RUC</dt>
+            <dd class="mono">{{ issuer.taxId }}</dd>
+          </div>
+          <div>
+            <dt>Razón social</dt>
+            <dd>{{ issuer.legalName }}</dd>
+          </div>
+          <div>
+            <dt>Establecimiento</dt>
+            <dd class="mono">{{ issuer.establishmentCode }}</dd>
+          </div>
+          <div>
+            <dt>Punto de emisión</dt>
+            <dd class="mono">{{ issuer.emissionPointCode }}</dd>
+          </div>
+          <div>
+            <dt>Ambiente</dt>
+            <dd>{{ issuer.environment === 'PRODUCTION' ? 'Producción' : 'Pruebas' }}</dd>
+          </div>
+          <div>
+            <dt>Activo</dt>
+            <dd>
+              <mega-status-badge
+                [status]="issuer.active ? 'AUTHORIZED' : 'PENDING'"
+                [customLabels]="{ AUTHORIZED: 'Sí', PENDING: 'No' }"
+                [customTones]="{ AUTHORIZED: 'success', PENDING: 'warning' }"
+              />
+            </dd>
+          </div>
+        </dl>
+      } @else {
+        <p class="state-box state-box--warning">
+          Sin emisor configurado. Completa los datos en la sección Emisores.
+        </p>
+      }
+    </div>
+
+    <div class="mega-card">
+      <h2 class="section-title">Ambiente SRI</h2>
+      <dl class="detail-grid">
+        <div>
+          <dt>Ambiente</dt>
+          <dd>{{ cfg.sriEnvironment || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Recepción</dt>
+          <dd class="mono">{{ cfg.sriReceptionUrl || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Autorización</dt>
+          <dd class="mono">{{ cfg.sriAuthorizationUrl || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Habilitado</dt>
+          <dd>{{ cfg.sriEnabled ? 'Sí' : 'No' }}</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="mega-card mega-card--flush">
+      <h2 class="section-title" style="padding: 1rem 1rem 0">Reglas fiscales</h2>
+      <div class="table-responsive">
+        <table class="table admin-table">
+          <thead>
+            <tr>
+              <th scope="col">Código</th>
+              <th scope="col">Nombre</th>
+              <th scope="col" class="text-end">Tarifa</th>
+              <th scope="col">Vigencia</th>
+              <th scope="col">Predeterminada</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (rule of cfg.taxRules; track rule.code) {
+              <tr>
+                <td class="mono">{{ rule.code }}</td>
+                <td>{{ rule.name }}</td>
+                <td class="text-end mono">{{ percent(rule.rate) }}</td>
+                <td>{{ rule.validFrom || '—' }} → {{ rule.validTo || '—' }}</td>
+                <td>
+                  @if (rule.defaultRule) {
+                    <mega-status-badge
+                      status="AUTHORIZED"
+                      [customLabels]="{ AUTHORIZED: 'Sí' }"
+                      [customTones]="{ AUTHORIZED: 'success' }"
+                    />
+                  } @else {
+                    No
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="text-center text-muted-mega">
+                  Sin reglas fiscales configuradas.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</section>

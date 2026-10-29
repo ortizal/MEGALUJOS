@@ -1,0 +1,143 @@
+// ==========================================================================
+// MEGALUJOS — Mixins y helpers SCSS reutilizables.
+// Uso desde componentes:  @use '../../../theme/src/lib/mega-variables' as mega;
+// (en apps: @use '@megalujos/theme/mega-variables' si se copian los assets al paquete)
+// Todos los mixins referencian las variables CSS de tokens.scss; no duplican valores.
+// ==========================================================================
+
+// Contenedor centrado con ancho máximo
+@mixin mega-container($max: var(--mega-container-max)) {
+  width: 100%;
+  max-width: $max;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+// Tarjeta de superficie estándar (radio 12-16px + sombra sutil)
+@mixin mega-card($radius: var(--mega-radius)) {
+  background: var(--mega-surface);
+  border: 1px solid var(--mega-border);
+  border-radius: $radius;
+  box-shadow: var(--mega-shadow-sm);
+}
+
+// Superficie oscura (encabezados, hero, footer)
+@mixin mega-dark-surface($radius: var(--mega-radius)) {
+  background: var(--mega-gradient-dark);
+  color: var(--mega-white);
+  border-radius: $radius;
+}
+
+// Control de formulario (input, select, textarea)
+@mixin mega-control($radius: var(--mega-radius-sm)) {
+  width: 100%;
+  font-family: var(--mega-font);
+  font-size: 0.925rem;
+  line-height: 1.4;
+  color: var(--mega-text);
+  background: var(--mega-surface);
+  border: 1px solid var(--mega-border);
+  border-radius: $radius;
+  padding: 0.5rem 0.75rem;
+  transition: border-color var(--mega-transition), box-shadow var(--mega-transition);
+
+  &::placeholder {
+    color: var(--mega-text-muted);
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--mega-silver);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--mega-red);
+    box-shadow: 0 0 0 3px rgba(215, 25, 32, 0.18);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--mega-red);
+  }
+}
+
+// Badge genérico (siempre con texto: nunca solo color)
+@mixin mega-badge($bg, $color, $radius: var(--mega-radius-pill)) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: $radius;
+  background: $bg;
+  color: $color;
+  white-space: nowrap;
+}
+
+// Etiqueta de campo de formulario
+@mixin mega-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--mega-text-secondary);
+  margin-bottom: 0.35rem;
+}
+
+// Texto auxiliar (hint / error)
+@mixin mega-hint($color: var(--mega-text-muted)) {
+  display: block;
+  font-size: 0.75rem;
+  color: $color;
+  margin-top: 0.3rem;
+}
+
+// Scrollbar sutil para paneles
+@mixin mega-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--mega-silver) transparent;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--mega-silver);
+    border-radius: var(--mega-radius-pill);
+  }
+}
+
+// Animación de aparición (respeta reduced-motion por la regla global de tokens)
+@mixin mega-fade-in($duration: 180ms) {
+  animation: mega-fade-in $duration ease;
+}
+
+@keyframes mega-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Texto de precio (cifras alineadas)
+@mixin mega-amount($weight: 700) {
+  font-variant-numeric: tabular-nums;
+  font-weight: $weight;
+}
+
+// Truncar una línea
+@mixin mega-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

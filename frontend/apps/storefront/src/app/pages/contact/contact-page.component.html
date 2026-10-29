@@ -1,0 +1,53 @@
+<section class="store-page-hero">
+  <div class="store-container">
+    <h1 class="store-page-hero__title">Contacto</h1>
+    <p class="store-page-hero__lead">
+      Escríbenos por WhatsApp para cotizar productos, servicios o consultar disponibilidad.
+    </p>
+  </div>
+</section>
+
+<section class="store-section">
+  <div class="store-container contact-grid">
+    <article class="store-card contact-card contact-card--wa">
+      <span class="contact-card__icon" aria-hidden="true">💬</span>
+      <h2 class="contact-card__title">WhatsApp</h2>
+      <p class="contact-card__text">
+        La vía más rápida. Respondemos en horario hábil con precios y disponibilidad.
+      </p>
+      <a class="store-btn store-btn--primary" [href]="whatsappUrl" target="_blank" rel="noopener"
+        >Escribir por WhatsApp</a
+      >
+    </article>
+
+    <article class="store-card contact-card">
+      <span class="contact-card__icon" aria-hidden="true">📞</span>
+      <h2 class="contact-card__title">Teléfono</h2>
+      <p class="contact-card__text">{{ phone }}</p>
+      <a class="store-btn store-btn--ghost" [href]="phoneHref">Llamar ahora</a>
+    </article>
+
+    <article class="store-card contact-card">
+      <span class="contact-card__icon" aria-hidden="true">📍</span>
+      <h2 class="contact-card__title">Dirección</h2>
+      <p class="contact-card__text">{{ address }}</p>
+      <p class="contact-card__hint">Ubicación de referencia — actualizar en producción.</p>
+    </article>
+
+    <article class="store-card contact-card">
+      <span class="contact-card__icon" aria-hidden="true">🕒</span>
+      <h2 class="contact-card__title">Horario</h2>
+      <p class="contact-card__text">{{ hours }}</p>
+      <p class="contact-card__hint">Horario de atención en America/Guayaquil.</p>
+    </article>
+
+    <article class="store-card contact-card">
+      <span class="contact-card__icon" aria-hidden="true">✉️</span>
+      <h2 class="contact-card__title">Correo</h2>
+      <p class="contact-card__text">
+        <a [href]="'mailto:' + email">{{ email }}</a>
+      </p>
+      <p class="contact-card__hint">Placeholder — configurar en environments.</p>
+    </article>
+  </div>
+</section>

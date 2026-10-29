@@ -1,0 +1,189 @@
+<section class="page" aria-labelledby="counts-title">
+  <header class="page__header">
+    <div>
+      <h1 id="counts-title">Conteos físicos</h1>
+      <p>Cuenta real por variante; el backend calcula la diferencia contra el sistema.</p>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <h2 class="section-title">Nuevo conteo</h2>
+
+    <form class="toolbar toolbar--wrap" (ngSubmit)="searchVariants()">
+      <div class="toolbar__grow">
+        <mega-input
+          label="Buscar variante"
+          name="counts-search"
+          type="search"
+          placeholder="SKU o nombre de producto"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </div>
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="searchVariants()" [loading]="searching()" size="sm">Buscar</mega-button>
+    </form>
+
+    @if (searchResults().length) {
+      <div class="list-group-mega mt-2">
+        @for (balance of searchResults(); track balance.variantId) {
+          <div class="list-group-mega__item">
+            <span><strong class="mono">{{ balance.sku }}</strong> — {{ balance.productName }}</span>
+            <span class="toolbar__spacer"></span>
+            <span class="text-muted-mega">Sistema: {{ num(balance.quantity) }}</span>
+            <mega-button size="sm" variant="ghost" (click)="addLine(balance)">Agregar</mega-button>
+          </div>
+        }
+      </div>
+    }
+
+    @if (lines().length) {
+      <div class="table-responsive mt-3">
+        <table class="table admin-table">
+          <thead>
+            <tr>
+              <th scope="col">Variante</th>
+              <th scope="col" class="text-end">Sistema</th>
+              <th scope="col" style="width: 180px">Contado (absoluto)</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of lines(); track line.variantId) {
+              <tr>
+                <td>{{ line.label }}</td>
+                <td class="text-end mono">{{ num(line.systemQuantity) }}</td>
+                <td>
+                  <input
+                    class="form-control form-control-sm"
+                    type="number"
+                    min="0"
+                    [ngModel]="line.countedQuantity"
+                    [ngModelOptions]="{ standalone: true }"
+                    (ngModelChange)="setCounted(line.variantId, $event)"
+                    [attr.aria-label]="'Cantidad contada de ' + line.label"
+                  />
+                </td>
+                <td class="text-end">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-link text-danger p-0"
+                    (click)="removeLine(line.variantId)"
+                  >
+                    Quitar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="return-form">
+        <div class="return-form__field">
+          <mega-textarea
+            label="Notas (opcional)"
+            name="counts-notes"
+            [rows]="2"
+            [ngModel]="notes()"
+            (ngModelChange)="notes.set($event)"
+          />
+        </div>
+        <div class="d-flex justify-content-end">
+          <mega-button (click)="submit()" [loading]="submitting()">Crear conteo</mega-button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="mega-card mega-card--flush">
+    <h2 class="section-title" style="padding: 1rem 1rem 0">Historial de conteos</h2>
+    <mega-table
+      [columns]="columns()"
+      [rows]="rows()"
+      [loading]="loading()"
+      [rowKey]="rowKey"
+      emptyText="Aún no hay conteos registrados."
+      aria-label="Tabla de conteos"
+    />
+
+    <ng-template #statusCell let-row>
+      <mega-status-badge [status]="row.status" />
+    </ng-template>
+
+    <ng-template #actionsCell let-row>
+      <div class="cell-actions cell-actions--end">
+        <mega-button size="sm" variant="ghost" (click)="openDetail(row)">Ver</mega-button>
+        @if (canComplete(row)) {
+          <mega-button size="sm" variant="outline" (click)="complete(row)">Completar</mega-button>
+        }
+        @if (canApprove(row)) {
+          <mega-button size="sm" variant="outline" (click)="approve(row)">Aprobar</mega-button>
+        }
+      </div>
+    </ng-template>
+
+    @if (!loading() && rows().length) {
+      <mega-pagination
+        [page]="page()"
+        [size]="size"
+        [total]="total()"
+        (pageChange)="goToPage($event)"
+        aria-label="Paginación de conteos"
+      />
+    }
+  </div>
+</section>
+
+<mega-modal
+  [open]="!!selected()"
+  [title]="'Conteo ' + (selected()?.countNumber ?? '')"
+  (close)="selected.set(null)"
+>
+  @if (selected(); as count) {
+    <dl class="detail-grid">
+      <div>
+        <dt>Estado</dt>
+        <dd><mega-status-badge [status]="count.status" /></dd>
+      </div>
+      <div>
+        <dt>Creado</dt>
+        <dd>{{ count.createdAt }}</dd>
+      </div>
+      <div>
+        <dt>Completado</dt>
+        <dd>{{ count.completedAt || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Aprobado</dt>
+        <dd>{{ count.approvedAt || '—' }}</dd>
+      </div>
+    </dl>
+
+    <div class="table-responsive">
+      <table class="table admin-table">
+        <thead>
+          <tr>
+            <th scope="col">Variante</th>
+            <th scope="col" class="text-end">Sistema</th>
+            <th scope="col" class="text-end">Contado</th>
+            <th scope="col" class="text-end">Diferencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of count.items; track item.id) {
+            <tr>
+              <td class="mono">{{ item.variantId.slice(0, 8) }}…</td>
+              <td class="text-end mono">{{ num(item.systemQuantity) }}</td>
+              <td class="text-end mono">{{ num(item.countedQuantity) }}</td>
+              <td class="text-end mono">{{ num(item.difference) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="d-flex justify-content-end mt-3" megaModalFooter>
+      <mega-button variant="ghost" (click)="selected.set(null)">Cerrar</mega-button>
+    </div>
+  }
+</mega-modal>

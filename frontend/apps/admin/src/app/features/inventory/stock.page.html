@@ -1,0 +1,105 @@
+<section class="page" aria-labelledby="stock-title">
+  <header class="page__header">
+    <div>
+      <h1 id="stock-title">Existencias</h1>
+      <p>Stock por variante y almacén, con alertas de mínimo.</p>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <form class="toolbar" (ngSubmit)="applyFilters()" aria-label="Filtros de stock">
+      <div class="toolbar__grow">
+        <mega-input
+          label="Buscar"
+          name="stock-q"
+          type="search"
+          placeholder="SKU o nombre de producto"
+          [ngModel]="query()"
+          (ngModelChange)="query.set($event)"
+        />
+      </div>
+      <div class="form-check align-self-end mb-2">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="stock-low"
+          [checked]="lowStockOnly()"
+          (change)="lowStockOnly.set($any($event.target).checked)"
+        />
+        <label class="form-check-label" for="stock-low">Solo bajo mínimo</label>
+      </div>
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="applyFilters()" size="sm">Buscar</mega-button>
+    </form>
+  </div>
+
+  @if (error(); as message) {
+    <mega-empty-state
+      icon="⚠️"
+      title="No pudimos cargar el stock"
+      [message]="message"
+      actionLabel="Reintentar"
+      (action)="load()"
+    />
+  } @else {
+    <div class="mega-card mega-card--flush">
+      <div class="table-responsive">
+        <table class="table admin-table">
+          <thead>
+            <tr>
+              <th scope="col">SKU</th>
+              <th scope="col">Producto</th>
+              <th scope="col">Almacén</th>
+              <th scope="col" class="text-end">Cantidad</th>
+              <th scope="col" class="text-end">Disponible</th>
+              <th scope="col" class="text-end">Mínimo</th>
+              <th scope="col">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (loading()) {
+              @for (row of [1, 2, 3, 4, 5]; track row) {
+                <tr>
+                  <td colspan="7" class="text-muted-mega">Cargando…</td>
+                </tr>
+              }
+            } @else {
+              @for (balance of rows(); track balance.variantId + balance.warehouseId) {
+                <tr>
+                  <td class="mono">{{ balance.sku }}</td>
+                  <td>{{ balance.productName }}</td>
+                  <td>{{ balance.warehouseName || shortId(balance.warehouseId) }}</td>
+                  <td class="text-end mono">{{ num(balance.quantity) }}</td>
+                  <td class="text-end mono">{{ num(balance.available) }}</td>
+                  <td class="text-end mono">{{ num(balance.minStock) }}</td>
+                  <td>
+                    <mega-stock-badge
+                      [availability]="balance.lowStock ? 'LOW_STOCK' : 'AVAILABLE'"
+                      [quantity]="num(balance.available)"
+                    />
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="text-center text-muted-mega">
+                    No hay saldos de stock con estos filtros.
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    @if (!loading() && rows().length) {
+      <mega-pagination
+        [page]="page()"
+        [size]="size"
+        [total]="total()"
+        (pageChange)="goToPage($event)"
+        aria-label="Paginación de stock"
+      />
+    }
+  }
+</section>

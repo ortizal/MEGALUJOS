@@ -1,0 +1,26 @@
+﻿@use '../shared/mega-form.base' as *;
+
+.mega-date-picker {
+  &__field {
+    padding-right: 2.25rem;
+    cursor: pointer;
+
+    // El selector nativo suele traer su propio Ã­cono: se oculta para usar el nuestro
+    &::-webkit-calendar-picker-indicator {
+      opacity: 0;
+      cursor: pointer;
+    }
+  }
+
+  &__icon {
+    position: absolute;
+    right: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 1rem;
+    color: var(--mega-text-muted, #8a939d);
+    pointer-events: none;
+  }
+}
+

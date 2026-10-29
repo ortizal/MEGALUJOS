@@ -1,0 +1,108 @@
+<section class="page" aria-labelledby="customers-title">
+  <header class="page__header">
+    <div>
+      <h1 id="customers-title">Clientes</h1>
+      <p>Directorio de clientes con identificación y contacto.</p>
+    </div>
+    <div class="page__actions">
+      <mega-button size="sm" (click)="openCreate()">+ Nuevo cliente</mega-button>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <form class="toolbar" (ngSubmit)="applyFilters()" aria-label="Búsqueda de clientes">
+      <div class="toolbar__grow">
+        <mega-input
+          label="Buscar"
+          name="customers-q"
+          type="search"
+          placeholder="Nombre o identificación"
+          [ngModel]="query()"
+          (ngModelChange)="query.set($event)"
+        />
+      </div>
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="applyFilters()" size="sm">Buscar</mega-button>
+    </form>
+  </div>
+
+  <div class="mega-card mega-card--flush">
+    <mega-table
+      [columns]="columns()"
+      [rows]="rows()"
+      [loading]="loading()"
+      [rowKey]="rowKey"
+      emptyText="No hay clientes registrados."
+      aria-label="Tabla de clientes"
+    />
+
+    <ng-template #actionsCell let-row>
+      <div class="cell-actions">
+        <mega-button size="sm" variant="ghost" (click)="openEdit(row)">Editar</mega-button>
+      </div>
+    </ng-template>
+  </div>
+
+  @if (!loading() && rows().length) {
+    <mega-pagination
+      [page]="page()"
+      [size]="size"
+      [total]="total()"
+      (pageChange)="goToPage($event)"
+      aria-label="Paginación de clientes"
+    />
+  }
+</section>
+
+<mega-modal
+  [open]="modalOpen()"
+  [title]="editingId() ? 'Editar cliente' : 'Nuevo cliente'"
+  (close)="modalOpen.set(false)"
+>
+  <form class="d-grid gap-3" (ngSubmit)="save()">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+    <mega-select
+      label="Tipo de documento"
+      name="customer-doc-type"
+      [options]="documentTypeOptions"
+      [ngModel]="documentType()"
+      (ngModelChange)="documentType.set($event)"
+    />
+    <mega-input
+      label="Identificación"
+      name="customer-doc"
+      [ngModel]="documentNumber()"
+      (ngModelChange)="documentNumber.set($event)"
+    />
+    <mega-input
+      label="Nombre / Razón social"
+      name="customer-name"
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)"
+    />
+    <mega-input
+      label="Teléfono"
+      name="customer-phone"
+      [ngModel]="phone()"
+      (ngModelChange)="phone.set($event)"
+    />
+    <mega-input
+      label="Email"
+      name="customer-email"
+      type="email"
+      [ngModel]="email()"
+      (ngModelChange)="email.set($event)"
+    />
+    <mega-textarea
+      label="Dirección"
+      name="customer-address"
+      [rows]="2"
+      [ngModel]="address()"
+      (ngModelChange)="address.set($event)"
+    />
+  </form>
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="modalOpen.set(false)">Cancelar</mega-button>
+    <mega-button (click)="save()" [loading]="saving()">Guardar</mega-button>
+  </div>
+</mega-modal>

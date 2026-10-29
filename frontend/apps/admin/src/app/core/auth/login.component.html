@@ -1,0 +1,41 @@
+<div class="auth-screen">
+  <section class="auth-card" aria-labelledby="login-title">
+    <div class="auth-card__brand">
+      <span class="sidebar__logo" aria-hidden="true">M</span>
+      <span class="sidebar__wordmark" style="color: var(--mega-black)">MEGA<span>LUJOS</span></span>
+    </div>
+
+    <h1 class="auth-card__title" id="login-title">Iniciar sesión</h1>
+    <p class="auth-card__subtitle">Ingresa con tu usuario para acceder al panel de administración.</p>
+
+    <form class="d-flex flex-column gap-3" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <mega-input
+        formControlName="username"
+        label="Usuario"
+        autocomplete="username"
+        placeholder="ej. admin"
+        [error]="invalid('username') ? 'El usuario es obligatorio.' : null"
+      />
+
+      <mega-input
+        formControlName="password"
+        label="Contraseña"
+        type="password"
+        autocomplete="current-password"
+        placeholder="••••••••"
+        [error]="invalid('password') ? 'La contraseña es obligatoria.' : null"
+      />
+
+      @if (serverError(); as error) {
+        <p class="state-box state-box--danger" role="alert">{{ error }}</p>
+      }
+
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="submit()" [loading]="loading()" block>Ingresar</mega-button>
+
+      <p class="admin-hint text-center mb-0">
+        ¿Olvidaste tu contraseña? Solicita el restablecimiento al administrador.
+      </p>
+    </form>
+  </section>
+</div>

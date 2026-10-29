@@ -1,0 +1,83 @@
+<section class="page" aria-labelledby="audit-title">
+  <header class="page__header">
+    <div>
+      <h1 id="audit-title">Auditoría</h1>
+      <p>Registro de acciones de usuarios en el sistema.</p>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <form class="toolbar toolbar--wrap" (ngSubmit)="applyFilters()" aria-label="Filtros de auditoría">
+      <div class="toolbar__grow">
+        <mega-input
+          label="Usuario (ID)"
+          name="audit-actor"
+          placeholder="ID de usuario"
+          [ngModel]="actorId()"
+          (ngModelChange)="actorId.set($event)"
+        />
+      </div>
+      <div style="min-width: 190px">
+        <mega-input
+          label="Entidad"
+          name="audit-entity"
+          placeholder="Tipo de entidad"
+          [ngModel]="entityType()"
+          (ngModelChange)="entityType.set($event)"
+        />
+      </div>
+      <div style="min-width: 170px">
+        <mega-input
+          label="Acción"
+          name="audit-action"
+          placeholder="Acción"
+          [ngModel]="action()"
+          (ngModelChange)="action.set($event)"
+        />
+      </div>
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="applyFilters()" size="sm">Aplicar</mega-button>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="clearFilters()">Limpiar</button>
+    </form>
+  </div>
+
+  @if (error(); as message) {
+    <mega-empty-state
+      icon="⚠️"
+      title="No se pudo cargar la auditoría"
+      [message]="message"
+      actionLabel="Reintentar"
+      (action)="load()"
+    />
+  } @else {
+    <div class="mega-card mega-card--flush">
+      <mega-table
+        [columns]="columns()"
+        [rows]="rows()"
+        [loading]="loading()"
+        [rowKey]="rowKey"
+        emptyText="No hay eventos de auditoría con estos filtros."
+        aria-label="Tabla de auditoría"
+      />
+      <ng-template #actorCell let-row>
+        {{ row.actorId ? shortId(row.actorId) : '-' }}
+      </ng-template>
+      <ng-template #entityCell let-row>
+        <span>{{ row.entityType ?? '-' }}</span>
+        @if (row.entityId) {
+          <span class="text-muted-mega"> · {{ shortId(row.entityId) }}</span>
+        }
+      </ng-template>
+    </div>
+
+    @if (!loading() && rows().length) {
+      <mega-pagination
+        [page]="page()"
+        [size]="size"
+        [total]="total()"
+        (pageChange)="goToPage($event)"
+        aria-label="Paginación de auditoría"
+      />
+    }
+  }
+</section>

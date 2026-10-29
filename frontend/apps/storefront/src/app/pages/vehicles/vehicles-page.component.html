@@ -1,0 +1,124 @@
+<section class="store-page-hero">
+  <div class="store-container">
+    <h1 class="store-page-hero__title">Encuentra accesorios por vehículo</h1>
+    <p class="store-page-hero__lead">
+      Selecciona tu marca, modelo, año y versión. Confirmamos la compatibilidad exacta contigo.
+    </p>
+  </div>
+</section>
+
+<section class="store-section">
+  <div class="store-container vehicles-layout">
+    <div class="store-card vehicles-selector">
+      <h2 class="vehicles-selector__title">Selecciona tu vehículo</h2>
+      <p class="vehicles-selector__note">
+        Datos de referencia. La compatibilidad verificada se confirma por WhatsApp antes de la
+        compra.
+      </p>
+
+      <form
+        class="vehicles-selector__grid"
+        (submit)="$event.preventDefault()"
+        aria-label="Selector de vehículo"
+      >
+        <div>
+          <label class="store-label" for="vehicle-brand">Marca</label>
+          <select
+            id="vehicle-brand"
+            class="store-control"
+            [value]="selectedBrand()"
+            (change)="onBrandChange(brandSelect.value)"
+            #brandSelect
+          >
+            <option value="">Selecciona una marca</option>
+            @for (brand of brands; track brand.name) {
+              <option [value]="brand.name">{{ brand.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="store-label" for="vehicle-model">Modelo</label>
+          <select
+            id="vehicle-model"
+            class="store-control"
+            [value]="selectedModel()"
+            (change)="onModelChange(modelSelect.value)"
+            [disabled]="models().length === 0"
+            #modelSelect
+          >
+            <option value="">Selecciona un modelo</option>
+            @for (model of models(); track model.name) {
+              <option [value]="model.name">{{ model.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="store-label" for="vehicle-year">Año</label>
+          <select
+            id="vehicle-year"
+            class="store-control"
+            [value]="selectedYear()"
+            (change)="selectedYear.set(yearSelect.value)"
+            #yearSelect
+          >
+            <option value="">Selecciona un año</option>
+            @for (year of years; track year) {
+              <option [value]="year">{{ year }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="store-label" for="vehicle-version">Versión</label>
+          <select
+            id="vehicle-version"
+            class="store-control"
+            [value]="selectedVersion()"
+            (change)="selectedVersion.set(versionSelect.value)"
+            [disabled]="versions().length === 0"
+            #versionSelect
+          >
+            <option value="">Selecciona una versión</option>
+            @for (version of versions(); track version) {
+              <option [value]="version">{{ version }}</option>
+            }
+          </select>
+        </div>
+      </form>
+
+      <div class="vehicles-selector__actions">
+        <a
+          class="store-btn store-btn--primary"
+          [class.store-btn--disabled]="!isComplete()"
+          [href]="whatsappUrl()"
+          target="_blank"
+          rel="noopener"
+          [attr.aria-disabled]="!isComplete()"
+          (click)="onWhatsappClick($event)"
+          >Confirmar compatibilidad por WhatsApp</a
+        >
+        <a class="store-btn store-btn--ghost" routerLink="/catalogo">Ver catálogo completo</a>
+      </div>
+    </div>
+
+    <aside class="vehicles-info">
+      <h2 class="vehicles-info__title">¿Cómo funciona?</h2>
+      <ol class="vehicles-info__steps">
+        <li><strong>Elige tu vehículo.</strong> Marca, modelo, año y versión.</li>
+        <li>
+          <strong>Confirma con nosotros.</strong> Un asesor verifica la compatibilidad del accesorio
+          con tu versión exacta.
+        </li>
+        <li>
+          <strong>Recibe e instala.</strong> Coordinamos entrega e instalación profesional si lo
+          necesitas.
+        </li>
+      </ol>
+      <p class="vehicles-info__placeholder">
+        🚧 Próximamente: consulta de compatibilidad verificada en línea, conectada al catálogo.
+      </p>
+    </aside>
+  </div>
+</section>

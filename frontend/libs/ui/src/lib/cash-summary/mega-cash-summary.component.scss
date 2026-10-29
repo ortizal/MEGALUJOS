@@ -1,0 +1,95 @@
+.mega-cash-summary {
+  background: var(--mega-surface, #fff);
+  border: 1px solid var(--mega-border, #dde2e7);
+  border-radius: var(--mega-radius, 16px);
+  padding: 1rem 1.15rem;
+  font-family: var(--mega-font, 'Inter', sans-serif);
+}
+
+.mega-cash-summary__title {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--mega-text, #22262c);
+}
+
+.mega-cash-summary__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.mega-cash-summary__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--mega-surface-alt, #eef1f4);
+  border-radius: var(--mega-radius-sm, 12px);
+  border-left: 3px solid var(--mega-border, #dde2e7);
+
+  &[data-tone='success'] {
+    border-left-color: var(--mega-green, #1f9d55);
+  }
+
+  &[data-tone='danger'] {
+    border-left-color: var(--mega-red, #d71920);
+  }
+
+  &[data-tone='warning'] {
+    border-left-color: var(--mega-amber, #d97706);
+  }
+
+  &[data-tone='muted'] {
+    border-left-color: var(--mega-text-secondary, #5b636d);
+  }
+}
+
+.mega-cash-summary__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--mega-text-secondary, #5b636d);
+}
+
+.mega-cash-summary__value {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--mega-text, #22262c);
+}
+
+.mega-cash-summary__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--mega-text-secondary, #5b636d);
+}
+
+.mega-cash-summary__footer {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0.9rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--mega-border, #dde2e7);
+  font-size: 0.9rem;
+  color: var(--mega-text-secondary, #5b636d);
+
+  strong {
+    font-size: 1.15rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--mega-text, #22262c);
+  }
+
+  &[data-tone='success'] strong {
+    color: var(--mega-green, #1f9d55);
+  }
+
+  &[data-tone='danger'] strong {
+    color: var(--mega-red, #d71920);
+  }
+}

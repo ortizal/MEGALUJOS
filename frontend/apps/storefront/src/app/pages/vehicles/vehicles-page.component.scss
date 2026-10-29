@@ -1,0 +1,83 @@
+.vehicles-layout {
+  display: grid;
+  gap: 1.75rem;
+}
+
+@media (min-width: 992px) {
+  .vehicles-layout {
+    grid-template-columns: 3fr 2fr;
+    align-items: start;
+  }
+}
+
+.vehicles-selector {
+  padding: 1.5rem;
+}
+
+.vehicles-selector__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--mega-black);
+}
+
+.vehicles-selector__note {
+  color: var(--mega-text-secondary);
+  font-size: 0.9rem;
+}
+
+.vehicles-selector__grid {
+  display: grid;
+  gap: 1rem;
+  margin-block: 1.25rem;
+}
+
+@media (min-width: 576px) {
+  .vehicles-selector__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.vehicles-selector__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.store-btn--disabled {
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.vehicles-info {
+  padding: 1.5rem;
+  border-radius: var(--mega-radius-lg);
+  background: var(--mega-gradient-dark);
+  color: var(--mega-white);
+}
+
+.vehicles-info__title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.vehicles-info__steps {
+  display: grid;
+  gap: 0.9rem;
+  padding-left: 1.2rem;
+  line-height: 1.55;
+  color: var(--mega-silver);
+  margin-bottom: 1.25rem;
+
+  strong {
+    color: var(--mega-white);
+  }
+}
+
+.vehicles-info__placeholder {
+  font-size: 0.85rem;
+  color: var(--mega-silver);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 1rem;
+  margin: 0;
+}

@@ -1,0 +1,136 @@
+<section class="page" aria-labelledby="adjustments-title">
+  <header class="page__header">
+    <div>
+      <h1 id="adjustments-title">Ajustes de inventario</h1>
+      <p>
+        Registra la cantidad absoluta final de cada variante; el backend calcula la diferencia
+        y la aplica al aprobar.
+      </p>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <h2 class="section-title">Nuevo ajuste</h2>
+
+    <form class="toolbar toolbar--wrap" (ngSubmit)="searchVariants()">
+      <div class="toolbar__grow">
+        <mega-input
+          label="Buscar variante"
+          name="adjustment-search"
+          type="search"
+          placeholder="SKU o nombre de producto"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </div>
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="searchVariants()" [loading]="searching()" size="sm">Buscar</mega-button>
+    </form>
+
+    @if (searchResults().length) {
+      <div class="list-group-mega mt-2">
+        @for (balance of searchResults(); track balance.variantId) {
+          <div class="list-group-mega__item">
+            <span><strong class="mono">{{ balance.sku }}</strong> — {{ balance.productName }}</span>
+            <span class="toolbar__spacer"></span>
+            <span class="text-muted-mega">Actual: {{ num(balance.quantity) }}</span>
+            <mega-button size="sm" variant="ghost" (click)="addLine(balance)">Agregar</mega-button>
+          </div>
+        }
+      </div>
+    }
+
+    @if (lines().length) {
+      <div class="table-responsive mt-3">
+        <table class="table admin-table">
+          <thead>
+            <tr>
+              <th scope="col">Variante</th>
+              <th scope="col" class="text-end">Cantidad actual</th>
+              <th scope="col" style="width: 180px">Cantidad final (absoluta)</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of lines(); track line.variantId) {
+              <tr>
+                <td>{{ line.label }}</td>
+                <td class="text-end mono">{{ num(line.currentQuantity) }}</td>
+                <td>
+                  <input
+                    class="form-control form-control-sm"
+                    type="number"
+                    min="0"
+                    [ngModel]="line.adjustedQuantity"
+                    [ngModelOptions]="{ standalone: true }"
+                    (ngModelChange)="setAdjusted(line.variantId, $event)"
+                    [attr.aria-label]="'Cantidad final de ' + line.label"
+                  />
+                </td>
+                <td class="text-end">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-link text-danger p-0"
+                    (click)="removeLine(line.variantId)"
+                  >
+                    Quitar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="return-form">
+        <div class="return-form__field">
+          <mega-textarea
+            label="Motivo del ajuste"
+            name="adjustment-reason"
+            placeholder="Ej. Merma por rotura detectada en conteo"
+            [rows]="2"
+            [ngModel]="reason()"
+            (ngModelChange)="reason.set($event)"
+          />
+        </div>
+        <div class="d-flex justify-content-end">
+          <mega-button (click)="submit()" [loading]="submitting()">Crear ajuste</mega-button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="mega-card mega-card--flush">
+    <h2 class="section-title" style="padding: 1rem 1rem 0">Historial de ajustes</h2>
+    <mega-table
+      [columns]="columns()"
+      [rows]="rows()"
+      [loading]="loading()"
+      [rowKey]="rowKey"
+      emptyText="Aún no hay ajustes registrados."
+      aria-label="Tabla de ajustes"
+    />
+
+    <ng-template #statusCell let-row>
+      <mega-status-badge [status]="row.status" />
+    </ng-template>
+
+    <ng-template #actionsCell let-row>
+      <div class="cell-actions cell-actions--end">
+        @if (canApprove(row)) {
+          <mega-button size="sm" variant="outline" (click)="approve(row)">Aprobar</mega-button>
+        }
+      </div>
+    </ng-template>
+
+    @if (!loading() && rows().length) {
+      <mega-pagination
+        [page]="page()"
+        [size]="size"
+        [total]="total()"
+        (pageChange)="goToPage($event)"
+        aria-label="Paginación de ajustes"
+      />
+    }
+  </div>
+</section>

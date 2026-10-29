@@ -1,0 +1,125 @@
+<section class="hero">
+  <div class="store-container hero__inner">
+    <div class="hero__copy">
+      <p class="hero__eyebrow">Accesorios y servicios automotrices</p>
+      <h1 class="hero__title">Accesorios que transforman tu vehículo</h1>
+      <p class="hero__lead">
+        Productos premium, instalación profesional y atención directa por WhatsApp. Equipamos tu
+        auto con estilo, protección y garantía.
+      </p>
+      <div class="hero__actions">
+        <a class="store-btn store-btn--primary" routerLink="/catalogo">Ver catálogo</a>
+        <a class="store-btn store-btn--outline" [href]="whatsappUrl" target="_blank" rel="noopener"
+          >Cotizar por WhatsApp</a
+        >
+      </div>
+    </div>
+    <div class="hero__art" aria-hidden="true">
+      <span class="hero__art-badge">🚗</span>
+    </div>
+  </div>
+</section>
+
+@if (banners().length > 0) {
+  <section class="store-section" aria-label="Novedades">
+    <div class="store-container">
+      <mega-carousel
+        [items]="banners()"
+        [autoplaySeconds]="autoplaySeconds()"
+        label="Ofertas y novedades"
+      />
+    </div>
+  </section>
+}
+
+<section class="store-section store-section--alt">
+  <div class="store-container">
+    <div class="store-section__head">
+      <div>
+        <h2 class="store-section-title">
+          {{ showcaseTitle() || 'Productos destacados' }}
+        </h2>
+        <p class="store-section-lead">
+          Lo más pedido por nuestros clientes, con disponibilidad actualizada.
+        </p>
+      </div>
+      <a class="store-btn store-btn--ghost" routerLink="/catalogo">Ver todo el catálogo</a>
+    </div>
+
+    @if (loading()) {
+      <div class="store-grid-products" aria-busy="true">
+        @for (item of [1, 2, 3, 4, 5, 6, 7, 8]; track item) {
+          <div class="store-card home-skeleton-card">
+            <mega-skeleton variant="block" height="180px" label="Cargando producto" />
+            <mega-skeleton variant="text" [lines]="3" label="Cargando datos del producto" />
+          </div>
+        }
+      </div>
+    } @else if (error()) {
+      <div class="store-state" role="alert">
+        <span class="store-state__icon" aria-hidden="true">⚠️</span>
+        <p class="store-state__title">No pudimos cargar los destacados</p>
+        <p class="store-state__message">
+          Revisa tu conexión e intenta de nuevo, o escríbenos directo por WhatsApp.
+        </p>
+        <button
+          type="button"
+          class="store-btn store-btn--primary store-state__action"
+          (click)="load()"
+        >
+          Reintentar
+        </button>
+      </div>
+    } @else if (featured().length === 0) {
+      <div class="store-state">
+        <span class="store-state__icon" aria-hidden="true">📦</span>
+        <p class="store-state__title">Aún no hay destacados</p>
+        <p class="store-state__message">
+          Pronto publicaremos novedades. Mientras tanto, explora el catálogo completo.
+        </p>
+        <a class="store-btn store-btn--primary store-state__action" routerLink="/catalogo"
+          >Ir al catálogo</a
+        >
+      </div>
+    } @else {
+      <div class="store-grid-products">
+        @for (product of featured(); track product.id) {
+          <app-product-card [product]="product" />
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<section class="store-section">
+  <div class="store-container">
+    <h2 class="store-section-title">Servicios profesionales</h2>
+    <p class="store-section-lead">
+      Detailing, instalación y protección con equipo especializado y productos de primera.
+    </p>
+    <div class="store-grid-cards">
+      @for (service of services; track service.title) {
+        <article class="store-card home-service">
+          <span class="home-service__icon" aria-hidden="true">{{ service.icon }}</span>
+          <h3 class="home-service__title">{{ service.title }}</h3>
+          <p class="home-service__text">{{ service.description }}</p>
+          <p class="home-service__price">{{ service.priceFrom }}</p>
+        </article>
+      }
+    </div>
+    <div class="home-services-cta">
+      <a class="store-btn store-btn--primary" routerLink="/servicios">Ver servicios</a>
+    </div>
+  </div>
+</section>
+
+<section class="home-trust" aria-label="Por qué confiar en MEGALUJOS">
+  <div class="store-container home-trust__inner">
+    @for (item of trustItems; track item.label) {
+      <div class="home-trust__item">
+        <span aria-hidden="true">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </div>
+    }
+  </div>
+</section>

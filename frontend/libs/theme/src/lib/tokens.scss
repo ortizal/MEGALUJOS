@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ==========================================================================
+   MEGALUJOS — Tokens visuales (contrato docs/CONVENTIONS.md §9)
+   Importar UNA sola vez en styles.scss de cada app (ruta relativa, porque
+   tsconfig paths no aplica a Sass y los libs no están linkados en node_modules):
+     @import '../../../libs/theme/src/lib/tokens.scss';   // apps/admin & apps/storefront
+   Los componentes de @megalujos/ui usan estas variables CSS con valor por
+   defecto en fallback, de modo que funcionan aunque el import global falte.
+   ========================================================================== */
+
+:root {
+  /* Paleta principal */
+  --mega-red: #d71920;
+  --mega-red-hover: #b9141a;
+  --mega-black: #111318;
+  --mega-carbon: #1b1f25;
+  --mega-silver: #aeb4bc;
+  --mega-white: #ffffff;
+  --mega-light: #f4f6f8;
+  --mega-text: #22262c;
+  --mega-success: #18855b;
+  --mega-warning: #b66a00;
+
+  /* Derivadas de superficie (light) */
+  --mega-bg: var(--mega-light);
+  --mega-surface: var(--mega-white);
+  --mega-surface-alt: #eef1f4;
+  --mega-border: #dde2e7;
+  --mega-text-secondary: #5b636d;
+  --mega-text-muted: #8a939d;
+  --mega-text-inverse: var(--mega-white);
+  --mega-overlay: rgba(17, 19, 24, 0.55);
+
+  /* Radios */
+  --mega-radius-sm: 8px;
+  --mega-radius: 12px;
+  --mega-radius-lg: 16px;
+  --mega-radius-pill: 999px;
+
+  /* Sombras */
+  --mega-shadow-sm: 0 1px 2px rgba(17, 19, 24, 0.08);
+  --mega-shadow: 0 4px 14px rgba(17, 19, 24, 0.1);
+  --mega-shadow-lg: 0 12px 32px rgba(17, 19, 24, 0.18);
+
+  /* Gradientes */
+  --mega-gradient-dark: linear-gradient(135deg, var(--mega-black) 0%, var(--mega-carbon) 100%);
+  --mega-gradient-red: linear-gradient(135deg, var(--mega-red) 0%, var(--mega-red-hover) 100%);
+  --mega-gradient-silver: linear-gradient(90deg, transparent 0%, var(--mega-silver) 50%, transparent 100%);
+
+  /* Tipografía */
+  --mega-font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --mega-font-mono: 'JetBrains Mono', 'Consolas', ui-monospace, monospace;
+
+  /* Duraciones (se anulan con prefers-reduced-motion vía duration-variables.scss) */
+  --mega-duration-fast: 120ms;
+  --mega-duration-base: 180ms;
+  --mega-duration-slow: 320ms;
+  --mega-ease: ease;
+  --mega-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Transiciones (se anulan con prefers-reduced-motion) */
+  --mega-transition: 180ms ease;
+
+  /* Estados semánticos: color de texto sobre fondos rellenos */
+  --mega-success-text: #ffffff;
+  --mega-warning-text: #ffffff;
+  --mega-danger-text: #ffffff;
+  --mega-info-text: #ffffff;
+
+  /* Layout */
+  --mega-sidebar-width: 260px;
+  --mega-header-height: 60px;
+  --mega-container-max: 1320px;
+
+  /* Estados semánticos */
+  --mega-info: #1d6fb8;
+  --mega-danger: var(--mega-red);
+}
+
+[data-theme='dark'] {
+  --mega-bg: var(--mega-black);
+  --mega-surface: var(--mega-carbon);
+  --mega-surface-alt: #232830;
+  --mega-border: #343b45;
+  --mega-text: #e8ecf1;
+  --mega-text-secondary: #aeb4bc;
+  --mega-text-muted: #7d8590;
+  --mega-text-inverse: var(--mega-black);
+  --mega-light: #1b1f25;
+  --mega-white: #e8ecf1;
+  --mega-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --mega-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --mega-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+  --mega-overlay: rgba(0, 0, 0, 0.65);
+}
+
+/* Respetar movimiento reducido a nivel global */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mega-transition: 0ms;
+    --mega-duration-fast: 0ms;
+    --mega-duration-base: 0ms;
+    --mega-duration-slow: 0ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Base tipográfica recomendada para las apps */
+body {
+  font-family: var(--mega-font);
+  color: var(--mega-text);
+  background: var(--mega-bg);
+}
+
+/* Foco visible accesible en toda la app */
+:focus-visible {
+  outline: 2px solid var(--mega-red);
+  outline-offset: 2px;
+}

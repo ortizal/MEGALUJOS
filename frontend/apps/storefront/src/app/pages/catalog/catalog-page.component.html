@@ -1,0 +1,178 @@
+<section class="store-page-hero">
+  <div class="store-container">
+    <h1 class="store-page-hero__title">Catálogo</h1>
+    <p class="store-page-hero__lead">
+      Accesorios y servicios publicados, con precios en USD y disponibilidad actualizada.
+    </p>
+  </div>
+</section>
+
+<section class="store-section">
+  <div class="store-container catalog-layout">
+    <aside class="catalog-filters store-card" aria-label="Filtros del catálogo">
+      <form
+        class="catalog-filters__form"
+        (ngSubmit)="applyPrices(minPriceInput.value, maxPriceInput.value)"
+      >
+        <div>
+          <label class="store-label" for="catalog-search">Buscar</label>
+          <input
+            id="catalog-search"
+            type="search"
+            class="store-control"
+            placeholder="Buscar productos…"
+            [formControl]="searchControl"
+          />
+        </div>
+
+        <div>
+          <span class="store-label" id="catalog-categories-label">Categorías</span>
+          <div class="catalog-chips" role="group" aria-labelledby="catalog-categories-label">
+            <button
+              type="button"
+              class="store-chip"
+              [class.store-chip--active]="!filters().category"
+              (click)="selectCategory(null)"
+            >
+              Todas
+            </button>
+            @for (category of categories(); track category.id) {
+              <button
+                type="button"
+                class="store-chip"
+                [class.store-chip--active]="filters().category === category.id"
+                (click)="selectCategory(category.id)"
+              >
+                {{ category.name }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label class="store-label" for="catalog-brand">Marca</label>
+          <select
+            id="catalog-brand"
+            class="store-control"
+            [value]="filters().brand"
+            (change)="selectBrand(brandSelect.value)"
+            #brandSelect
+          >
+            <option value="">Todas las marcas</option>
+            @for (brand of brands(); track brand.id) {
+              <option [value]="brand.id">{{ brand.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="store-label" for="catalog-sort">Ordenar por</label>
+          <select
+            id="catalog-sort"
+            class="store-control"
+            [value]="filters().sort"
+            (change)="selectSort(sortSelect.value)"
+            #sortSelect
+          >
+            @for (option of sortOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+
+        <fieldset class="catalog-price">
+          <legend class="store-label">Precio (USD)</legend>
+          <div class="catalog-price__row">
+            <input
+              id="catalog-min-price"
+              type="number"
+              min="0"
+              step="0.01"
+              class="store-control"
+              placeholder="Mín."
+              [value]="filters().minPrice"
+              #minPriceInput
+            />
+            <input
+              id="catalog-max-price"
+              type="number"
+              min="0"
+              step="0.01"
+              class="store-control"
+              placeholder="Máx."
+              [value]="filters().maxPrice"
+              #maxPriceInput
+            />
+          </div>
+          <button type="submit" class="store-btn store-btn--primary catalog-price__apply">
+            Aplicar precio
+          </button>
+        </fieldset>
+
+        <button type="button" class="store-btn store-btn--ghost" (click)="clearFilters()">
+          Limpiar filtros
+        </button>
+      </form>
+    </aside>
+
+    <div class="catalog-results">
+      <p class="catalog-results__summary" role="status">
+        @if (loading()) {
+          Cargando productos…
+        } @else {
+          {{ total() }} producto(s) encontrado(s)
+        }
+      </p>
+
+      @if (loading()) {
+        <div class="store-grid-products" aria-busy="true">
+          @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+            <div class="store-card catalog-skeleton-card">
+              <mega-skeleton variant="block" height="180px" label="Cargando producto" />
+              <mega-skeleton variant="text" [lines]="3" label="Cargando datos del producto" />
+            </div>
+          }
+        </div>
+      } @else if (error()) {
+        <div class="store-state" role="alert">
+          <span class="store-state__icon" aria-hidden="true">⚠️</span>
+          <p class="store-state__title">No pudimos cargar el catálogo</p>
+          <p class="store-state__message">
+            Ocurrió un problema al consultar los productos. Intenta nuevamente en unos segundos.
+          </p>
+          <button
+            type="button"
+            class="store-btn store-btn--primary store-state__action"
+            (click)="retry()"
+          >
+            Reintentar
+          </button>
+        </div>
+      } @else if (products().length === 0) {
+        <mega-empty-state
+          icon="🔍"
+          title="Sin resultados"
+          message="No hay productos que coincidan con los filtros. Prueba con otros términos o limpia los filtros."
+          actionLabel="Limpiar filtros"
+          (action)="clearFilters()"
+        />
+      } @else {
+        <div class="store-grid-products">
+          @for (product of products(); track product.id) {
+            <app-product-card [product]="product" />
+          }
+        </div>
+
+        <div class="catalog-pagination">
+          <mega-pagination
+            [page]="page()"
+            [size]="pageSize"
+            [total]="total()"
+            ariaLabel="Paginación del catálogo"
+            (pageChange)="goToPage($event)"
+          />
+        </div>
+      }
+    </div>
+  </div>
+</section>

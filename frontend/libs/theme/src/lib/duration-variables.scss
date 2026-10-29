@@ -1,0 +1,82 @@
+// ==========================================================================
+// MEGALUJOS — Duraciones, easing y helpers de movimiento.
+// Uso en componentes (libs/ui y apps):
+//   @use '../../../theme/src/lib/duration-variables' as dur;
+//   .mi-panel { transition: transform dur.$duration-base dur.$ease-out; }
+//   @include dur.motion-safe('fade-in');
+// Siempre referencian las variables CSS de tokens.scss: no duplican valores.
+// ==========================================================================
+
+// Duraciones (CSS custom properties, anuladas con prefers-reduced-motion)
+$duration-fast: var(--mega-duration-fast, 120ms);
+$duration-base: var(--mega-duration-base, 180ms);
+$duration-slow: var(--mega-duration-slow, 320ms);
+
+// Easings
+$ease: var(--mega-ease, ease);
+$ease-out: var(--mega-ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+
+// Transición estándar de controles (borde + sombra de foco)
+@mixin transition-colors($duration: $duration-base) {
+  transition: background-color $duration $ease, border-color $duration $ease,
+    color $duration $ease, box-shadow $duration $ease;
+}
+
+// Transición de elevación (tarjetas, popovers)
+@mixin transition-transform($duration: $duration-base) {
+  transition: transform $duration $ease-out, opacity $duration $ease;
+}
+
+// Aplica una animación SOLO si el usuario no pidió movimiento reducido.
+// (tokens.scss ya anula las animaciones globales, esto evita además el trabajo extra)
+@mixin motion-safe($name, $duration: $duration-base, $fill: both) {
+  animation: $name $duration $ease-out $fill;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+// Ancla de scroll suave (se anula en reduced-motion por tokens.scss)
+@mixin smooth-scroll {
+  scroll-behavior: smooth;
+
+  @media (prefers-reduced-motion: reduce) {
+    scroll-behavior: auto;
+  }
+}
+
+// Keyframes reutilizables
+@keyframes mega-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mega-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes mega-shimmer {
+  from {
+    background-position: -200% 0;
+  }
+
+  to {
+    background-position: 200% 0;
+  }
+}

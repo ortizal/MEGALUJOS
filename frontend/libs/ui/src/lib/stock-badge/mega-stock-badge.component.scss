@@ -1,0 +1,46 @@
+.mega-stock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.6rem;
+  font-family: var(--mega-font, 'Inter', sans-serif);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--mega-radius-pill, 999px);
+  white-space: nowrap;
+
+  &__icon {
+    font-size: 0.65rem;
+    line-height: 1;
+  }
+
+  &__qty {
+    font-weight: 500;
+    opacity: 0.8;
+  }
+
+  &--available {
+    background: rgba(24, 133, 91, 0.14);
+    color: var(--mega-success, #18855b);
+  }
+
+  &--low {
+    background: rgba(182, 106, 0, 0.14);
+    color: var(--mega-warning, #b66a00);
+  }
+
+  &--out {
+    background: rgba(215, 25, 32, 0.12);
+    color: var(--mega-red, #d71920);
+  }
+
+  &--request {
+    background: rgba(174, 180, 188, 0.25);
+    color: var(--mega-text-secondary, #5b636d);
+  }
+
+  &--neutral {
+    background: var(--mega-surface-alt, #eef1f4);
+    color: var(--mega-text-secondary, #5b636d);
+  }
+}

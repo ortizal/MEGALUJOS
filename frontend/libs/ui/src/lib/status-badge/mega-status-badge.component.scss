@@ -1,0 +1,45 @@
+.mega-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.65rem;
+  font-family: var(--mega-font, 'Inter', sans-serif);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--mega-radius-pill, 999px);
+  white-space: nowrap;
+
+  &__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  &--success {
+    background: rgba(24, 133, 91, 0.14);
+    color: var(--mega-success, #18855b);
+  }
+
+  &--warning {
+    background: rgba(182, 106, 0, 0.14);
+    color: var(--mega-warning, #b66a00);
+  }
+
+  &--danger {
+    background: rgba(215, 25, 32, 0.12);
+    color: var(--mega-red, #d71920);
+  }
+
+  &--info {
+    background: rgba(29, 111, 184, 0.14);
+    color: var(--mega-info, #1d6fb8);
+  }
+
+  &--neutral {
+    background: var(--mega-surface-alt, #eef1f4);
+    color: var(--mega-text-secondary, #5b636d);
+    border: 1px solid var(--mega-border, #dde2e7);
+  }
+}

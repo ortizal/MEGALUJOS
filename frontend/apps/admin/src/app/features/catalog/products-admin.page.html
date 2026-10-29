@@ -1,0 +1,117 @@
+<section class="page" aria-labelledby="products-title">
+  <header class="page__header">
+    <div>
+      <h1 id="products-title">Productos</h1>
+      <p>Administra el catálogo: variantes, precios, imágenes y publicación.</p>
+    </div>
+    <div class="page__actions">
+      <a class="btn btn-primary btn-sm" routerLink="/catalogo/productos/nuevo">
+        + Nuevo producto
+      </a>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <form class="toolbar toolbar--wrap" (ngSubmit)="applyFilters()" aria-label="Filtros de productos">
+      <div class="toolbar__grow">
+        <mega-input
+          label="Buscar"
+          name="products-q"
+          type="search"
+          placeholder="Nombre o SKU"
+          [ngModel]="query()"
+          (ngModelChange)="query.set($event)"
+        />
+      </div>
+      <div style="min-width: 190px">
+        <mega-select
+          label="Categoría"
+          name="products-category"
+          [options]="categoryOptions()"
+          [ngModel]="categoryId()"
+          (ngModelChange)="categoryId.set($event)"
+        />
+      </div>
+      <div style="min-width: 170px">
+        <mega-select
+          label="Marca"
+          name="products-brand"
+          [options]="brandOptions()"
+          [ngModel]="brandId()"
+          (ngModelChange)="brandId.set($event)"
+        />
+      </div>
+      <div style="min-width: 190px">
+        <mega-select
+          label="Visibilidad"
+          name="products-published"
+          [options]="publishedOptions"
+          [ngModel]="published()"
+          (ngModelChange)="published.set($event)"
+        />
+      </div>
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="applyFilters()" size="sm">Aplicar</mega-button>
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        (click)="query.set(''); categoryId.set(''); brandId.set(''); published.set(''); applyFilters()"
+      >
+        Limpiar
+      </button>
+    </form>
+  </div>
+
+  @if (error(); as message) {
+    <mega-empty-state
+      icon="⚠️"
+      title="No pudimos cargar los productos"
+      [message]="message"
+      actionLabel="Reintentar"
+      (action)="load()"
+    />
+  } @else {
+    <div class="mega-card mega-card--flush">
+      <mega-table
+        [columns]="columns()"
+        [rows]="rows()"
+        [loading]="loading()"
+        [rowKey]="rowKey"
+        emptyText="No hay productos con estos filtros."
+        aria-label="Tabla de productos"
+      />
+
+      <ng-template #publishedCell let-row>
+        <mega-status-badge
+          [status]="row.published ? 'AUTHORIZED' : 'PENDING'"
+          [customLabels]="{ AUTHORIZED: 'Visible', PENDING: 'Oculto' }"
+          [customTones]="{ AUTHORIZED: 'success', PENDING: 'neutral' }"
+        />
+      </ng-template>
+
+      <ng-template #actionsCell let-row>
+        <div class="cell-actions">
+          <a
+            class="btn btn-outline-secondary btn-sm"
+            [routerLink]="['/catalogo/productos', row.id]"
+          >
+            Editar
+          </a>
+          <mega-button size="sm" variant="ghost" (click)="togglePublished(row)">
+            {{ row.published ? 'Despublicar' : 'Publicar' }}
+          </mega-button>
+        </div>
+      </ng-template>
+    </div>
+
+    @if (!loading() && rows().length) {
+      <mega-pagination
+        [page]="page()"
+        [size]="size"
+        [total]="total()"
+        (pageChange)="goToPage($event)"
+        aria-label="Paginación de productos"
+      />
+    }
+  }
+</section>

@@ -1,0 +1,42 @@
+<div class="tv" #stage>
+  <header class="tv__bar">
+    <a class="tv__wordmark" routerLink="/" aria-label="MEGALUJOS, ir al inicio">
+      MEGA<span>LUJOS</span>
+    </a>
+    <p class="tv__clock" aria-hidden="true">{{ clock() }}</p>
+    <div class="tv__actions">
+      <span class="tv__hint">Pulsa F para pantalla completa</span>
+      <button type="button" class="tv__fs-btn" (click)="toggleFullscreen()">
+        {{ fullscreen() ? 'Salir' : 'Pantalla completa' }}
+      </button>
+    </div>
+  </header>
+
+  <main class="tv__stage">
+    @if (loading()) {
+      <div class="tv__loading" aria-busy="true">
+        <mega-skeleton variant="block" height="50vh" width="100%" label="Cargando presentación" />
+      </div>
+    } @else if (error() || items().length === 0) {
+      <mega-empty-state
+        icon="📺"
+        title="Esperando productos del catálogo"
+        message="La presentación se actualizará automáticamente en unos segundos."
+      />
+    } @else {
+      <mega-carousel
+        [items]="items()"
+        [autoplaySeconds]="autoplaySeconds()"
+        label="Presentación de productos MEGALUJOS"
+      />
+    }
+  </main>
+
+  @if (promos().length > 0) {
+    <aside class="tv__promos" aria-label="Promociones vigentes">
+      @for (promo of promos(); track promo.id) {
+        <span class="tv__promo">{{ promoLabel(promo) }}</span>
+      }
+    </aside>
+  }
+</div>

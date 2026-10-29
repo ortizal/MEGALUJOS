@@ -1,0 +1,71 @@
+.services-card {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1.5rem;
+  align-content: start;
+}
+
+.services-card__icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.services-card__title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--mega-black);
+  margin: 0;
+}
+
+.services-card__text {
+  color: var(--mega-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.services-card__features {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  color: var(--mega-text);
+  font-size: 0.9rem;
+
+  li::before {
+    content: '✓ ';
+    color: var(--mega-success);
+    font-weight: 700;
+  }
+}
+
+.services-card__price {
+  font-weight: 800;
+  color: var(--mega-red);
+  margin: 0.5rem 0 0.25rem;
+}
+
+.services-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--mega-gradient-dark);
+  border: 0;
+  color: var(--mega-white);
+}
+
+.services-note__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.services-note__text {
+  color: var(--mega-silver);
+  max-width: 40rem;
+  margin: 0;
+}

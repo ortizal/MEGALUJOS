@@ -1,0 +1,53 @@
+.mega-price {
+  font-family: var(--mega-font, 'Inter', sans-serif);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--mega-text, #22262c);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+
+  &--sm {
+    font-size: 0.9rem;
+  }
+
+  &--lg {
+    font-size: 1.4rem;
+  }
+
+  &--compact {
+    font-size: 1rem;
+  }
+
+  &--success {
+    color: var(--mega-green, #1f9d55);
+  }
+
+  &--danger {
+    color: var(--mega-red, #d71920);
+  }
+
+  &--muted {
+    color: var(--mega-text-secondary, #5b636d);
+    font-weight: 600;
+  }
+
+  &__compare {
+    font-size: 0.8em;
+    font-weight: 500;
+    color: var(--mega-text-secondary, #5b636d);
+    text-decoration: line-through;
+  }
+
+  &__value {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mega-price {
+    transition: none;
+  }
+}

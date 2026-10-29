@@ -1,0 +1,84 @@
+<section class="page" aria-labelledby="dashboard-title">
+  <header class="page__header">
+    <div>
+      <h1 id="dashboard-title">Dashboard</h1>
+      <p>Resumen operativo de MEGALUJOS (zona horaria America/Guayaquil).</p>
+    </div>
+    <div class="page__actions">
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="load()">
+        Actualizar
+      </button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="stat-grid" aria-busy="true" aria-live="polite">
+      @for (item of [1, 2, 3, 4]; track item) {
+        <div class="stat-card">
+          <mega-skeleton variant="text" [lines]="3" width="70%" label="Cargando indicador" />
+        </div>
+      }
+    </div>
+  } @else if (error(); as message) {
+    <mega-empty-state
+      icon="⚠️"
+      title="No pudimos cargar los indicadores"
+      [message]="message"
+      actionLabel="Reintentar"
+      (action)="load()"
+    />
+  } @else if (stats(); as data) {
+    <div class="stat-grid">
+      <article class="stat-card">
+        <span class="stat-card__label">Ventas de hoy</span>
+        <strong class="stat-card__value">{{ money(data.totalSalesTodayAmount) }}</strong>
+        <span class="stat-card__hint">{{ count(data.totalSalesTodayCount) }} transacciones</span>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-card__label">Caja abierta</span>
+        <strong class="stat-card__value">{{ money(data.currentCashSessionBalance) }}</strong>
+        <span class="stat-card__hint">
+          {{ count(data.openCashSessionsCount) }}
+          {{ data.openCashSessionsCount === 1 ? 'sesión abierta' : 'sesiones abiertas' }}
+        </span>
+        @if (auth.hasRole('ADMIN') || auth.hasAnyPermission(['cash:manage'])) {
+          <a class="stat-card__link" routerLink="/caja">Ir a caja →</a>
+        }
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-card__label">Stock bajo</span>
+        <strong class="stat-card__value">{{ count(data.lowStockProductsCount) }}</strong>
+        <span class="stat-card__hint">variantes por debajo del mínimo</span>
+        <a class="stat-card__link" routerLink="/inventario/alertas">Ver alertas →</a>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-card__label">Sesión actual</span>
+        <strong class="stat-card__value">
+          {{ data.openCashSessionsCount > 0 ? 'Abierta' : 'Cerrada' }}
+        </strong>
+        <span class="stat-card__hint">
+          {{
+            data.openCashSessionsCount > 0
+              ? 'Puedes registrar ventas en el POS.'
+              : 'Abre una sesión para vender.'
+          }}
+        </span>
+      </article>
+    </div>
+
+    <div class="mega-card">
+      <h2 class="mega-card__title">Accesos rápidos</h2>
+      <div class="quick-grid">
+        @for (link of visibleQuickLinks(); track link.path) {
+          <a class="quick-link" [routerLink]="link.path">
+            <span class="quick-link__icon" aria-hidden="true">{{ link.icon }}</span>
+            <span>{{ link.label }}</span>
+          </a>
+        }
+      </div>
+    </div>
+  }
+</section>

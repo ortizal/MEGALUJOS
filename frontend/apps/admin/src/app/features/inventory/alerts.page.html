@@ -1,0 +1,72 @@
+<section class="page" aria-labelledby="alerts-title">
+  <header class="page__header">
+    <div>
+      <h1 id="alerts-title">Alertas de stock</h1>
+      <p>Variantes por debajo del stock mínimo configurado.</p>
+    </div>
+    <div class="page__actions">
+      <mega-button variant="outline" size="sm" (click)="load()">Recargar</mega-button>
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <mega-empty-state
+      icon="⚠️"
+      title="No pudimos cargar las alertas"
+      [message]="message"
+      actionLabel="Reintentar"
+      (action)="load()"
+    />
+  } @else if (!loading() && !rows().length) {
+    <mega-empty-state
+      icon="✅"
+      title="Sin alertas de stock"
+      message="Ninguna variante está por debajo del mínimo. ¡Buen trabajo!"
+    />
+  } @else {
+    <div class="mega-card mega-card--flush">
+      <div class="table-responsive">
+        <table class="table admin-table">
+          <thead>
+            <tr>
+              <th scope="col">SKU</th>
+              <th scope="col">Producto</th>
+              <th scope="col">Almacén</th>
+              <th scope="col" class="text-end">Cantidad</th>
+              <th scope="col" class="text-end">Mínimo</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (loading()) {
+              @for (row of [1, 2, 3]; track row) {
+                <tr>
+                  <td colspan="7" class="text-muted-mega">Cargando…</td>
+                </tr>
+              }
+            } @else {
+              @for (alert of rows(); track alert.variantId) {
+                <tr>
+                  <td class="mono">{{ alert.sku }}</td>
+                  <td>{{ alert.productName }}</td>
+                  <td>{{ alert.warehouseName || shortId(alert.variantId) }}</td>
+                  <td class="text-end mono">{{ num(alert.quantity) }}</td>
+                  <td class="text-end mono">{{ num(alert.minStock) }}</td>
+                  <td>
+                    <mega-stock-badge availability="LOW_STOCK" [quantity]="num(alert.quantity)" />
+                  </td>
+                  <td>
+                    <a class="btn btn-outline-secondary btn-sm" routerLink="/inventario/ajustes">
+                      Ajustar
+                    </a>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</section>

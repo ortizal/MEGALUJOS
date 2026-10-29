@@ -1,0 +1,214 @@
+<section class="page" aria-labelledby="vehicles-title">
+  <header class="page__header">
+    <div>
+      <h1 id="vehicles-title">Vehículos</h1>
+      <p>Marcas, modelos y versiones para compatibilidad de productos.</p>
+    </div>
+    <div class="page__actions">
+      <mega-button size="sm" (click)="openCreate(tab())">+ Nuevo</mega-button>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <div class="admin-tabs" role="tablist" aria-label="Secciones de vehículos">
+      <button
+        type="button"
+        class="admin-tabs__tab"
+        [class.admin-tabs__tab--active]="tab() === 'brands'"
+        role="tab"
+        [attr.aria-selected]="tab() === 'brands'"
+        (click)="selectTab('brands')"
+      >
+        Marcas
+      </button>
+      <button
+        type="button"
+        class="admin-tabs__tab"
+        [class.admin-tabs__tab--active]="tab() === 'models'"
+        role="tab"
+        [attr.aria-selected]="tab() === 'models'"
+        (click)="selectTab('models')"
+      >
+        Modelos
+      </button>
+      <button
+        type="button"
+        class="admin-tabs__tab"
+        [class.admin-tabs__tab--active]="tab() === 'versions'"
+        role="tab"
+        [attr.aria-selected]="tab() === 'versions'"
+        (click)="selectTab('versions')"
+      >
+        Versiones
+      </button>
+    </div>
+
+    @if (tab() === 'models') {
+      <div class="toolbar mt-3">
+        <div style="min-width: 220px">
+          <mega-select
+            label="Filtrar por marca"
+            name="vehicle-brand-filter"
+            [options]="brandOptions()"
+            [ngModel]="brandFilter()"
+            (ngModelChange)="brandFilter.set($event); loadModels()"
+          />
+        </div>
+      </div>
+    }
+
+    @if (tab() === 'versions') {
+      <div class="toolbar mt-3">
+        <div style="min-width: 240px">
+          <mega-select
+            label="Filtrar por modelo"
+            name="vehicle-model-filter"
+            [options]="modelOptions()"
+            [ngModel]="modelFilter()"
+            (ngModelChange)="modelFilter.set($event); loadVersions()"
+          />
+        </div>
+      </div>
+    }
+
+    <div class="table-responsive mt-3">
+      <table class="table admin-table">
+        @if (tab() === 'brands') {
+          <thead>
+            <tr>
+              <th scope="col">Marca</th>
+              <th scope="col" class="text-end" style="width: 160px">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (brand of brands(); track brand.id) {
+              <tr>
+                <td>{{ brand.name }}</td>
+                <td class="text-end">
+                  <div class="cell-actions cell-actions--end">
+                    <mega-button size="sm" variant="ghost" (click)="openEdit('brands', brand)">
+                      Editar
+                    </mega-button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="2" class="text-center text-muted-mega">Sin marcas registradas.</td>
+              </tr>
+            }
+          </tbody>
+        } @else if (tab() === 'models') {
+          <thead>
+            <tr>
+              <th scope="col">Modelo</th>
+              <th scope="col">Marca</th>
+              <th scope="col" class="text-end" style="width: 160px">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (model of models(); track model.id) {
+              <tr>
+                <td>{{ model.name }}</td>
+                <td>{{ model.brandName || '—' }}</td>
+                <td class="text-end">
+                  <div class="cell-actions cell-actions--end">
+                    <mega-button size="sm" variant="ghost" (click)="openEdit('models', model)">
+                      Editar
+                    </mega-button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="3" class="text-center text-muted-mega">Sin modelos registrados.</td>
+              </tr>
+            }
+          </tbody>
+        } @else {
+          <thead>
+            <tr>
+              <th scope="col">Versión</th>
+              <th scope="col">Modelo</th>
+              <th scope="col" class="text-end">Años</th>
+              <th scope="col" class="text-end" style="width: 160px">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (version of versions(); track version.id) {
+              <tr>
+                <td>{{ version.name }}</td>
+                <td>{{ version.modelName || '—' }}</td>
+                <td class="text-end">
+                  {{ version.yearFrom || '—' }} — {{ version.yearTo || '—' }}
+                </td>
+                <td class="text-end">
+                  <div class="cell-actions cell-actions--end">
+                    <mega-button size="sm" variant="ghost" (click)="openEdit('versions', version)">
+                      Editar
+                    </mega-button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="text-center text-muted-mega">Sin versiones registradas.</td>
+              </tr>
+            }
+          </tbody>
+        }
+      </table>
+    </div>
+  </div>
+</section>
+
+<mega-modal [open]="modalOpen()" [title]="modalTitle()" (close)="modalOpen.set(false)">
+  <form class="d-grid gap-3" (ngSubmit)="save()">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+
+    @if (tab() === 'models') {
+      <mega-select
+        label="Marca"
+        name="vehicle-brand"
+        [options]="brandOptions().slice(1)"
+        [ngModel]="parentBrandId()"
+        (ngModelChange)="parentBrandId.set($event)"
+      />
+    }
+
+    @if (tab() === 'versions') {
+      <mega-select
+        label="Modelo"
+        name="vehicle-model"
+        [options]="modelOptions().slice(1)"
+        [ngModel]="parentModelId()"
+        (ngModelChange)="parentModelId.set($event)"
+      />
+    }
+
+    <mega-input label="Nombre" name="vehicle-name" [ngModel]="name()" (ngModelChange)="name.set($event)" />
+
+    @if (tab() === 'versions') {
+      <div class="form-grid">
+        <mega-input
+          label="Año desde"
+          name="vehicle-year-from"
+          type="number"
+          [ngModel]="yearFrom()"
+          (ngModelChange)="yearFrom.set($event)"
+        />
+        <mega-input
+          label="Año hasta"
+          name="vehicle-year-to"
+          type="number"
+          [ngModel]="yearTo()"
+          (ngModelChange)="yearTo.set($event)"
+        />
+      </div>
+    }
+  </form>
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="modalOpen.set(false)">Cancelar</mega-button>
+    <mega-button (click)="save()" [loading]="saving()">Guardar</mega-button>
+  </div>
+</mega-modal>

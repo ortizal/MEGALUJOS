@@ -1,0 +1,85 @@
+<section class="store-section">
+  <div class="store-container">
+    <nav class="product-breadcrumb" aria-label="Migas de pan">
+      <a routerLink="/catalogo">Catálogo</a>
+      <span aria-hidden="true">/</span>
+      <span>Detalle del producto</span>
+    </nav>
+
+    @if (loading()) {
+      <div class="product-layout" aria-busy="true">
+        <mega-skeleton variant="block" height="360px" label="Cargando imagen del producto" />
+        <div class="product-info">
+          <mega-skeleton variant="text" [lines]="4" label="Cargando información del producto" />
+        </div>
+      </div>
+    } @else if (error() || !product()) {
+      <div class="store-state" role="alert">
+        <span class="store-state__icon" aria-hidden="true">⚠️</span>
+        <p class="store-state__title">Producto no disponible</p>
+        <p class="store-state__message">
+          No encontramos este producto. Puede haber cambiado de estado o haberse retirado del
+          catálogo.
+        </p>
+        <a class="store-btn store-btn--primary store-state__action" routerLink="/catalogo"
+          >Volver al catálogo</a
+        >
+      </div>
+    } @else {
+      @if (product(); as p) {
+        <div class="product-layout">
+          <mega-product-gallery [images]="galleryImages()" [name]="p.name" />
+
+          <div class="product-info">
+            <p class="product-info__sku">SKU {{ p.sku }}</p>
+            <h1 class="product-info__name">{{ p.name }}</h1>
+
+            <div class="product-info__meta">
+              @if (p.categoryName) {
+                <span class="product-info__tag">{{ p.categoryName }}</span>
+              }
+              @if (p.brandName) {
+                <span class="product-info__tag">{{ p.brandName }}</span>
+              }
+            </div>
+
+            <mega-price [value]="p.price" size="lg" />
+
+            <mega-stock-badge [availability]="p.availability" [quantity]="p.availableStock" />
+
+            @if (p.description) {
+              <p class="product-info__description">{{ p.description }}</p>
+            }
+
+            <div class="product-info__actions">
+              <a
+                class="store-btn store-btn--primary product-info__wa"
+                [href]="whatsappHref()"
+                target="_blank"
+                rel="noopener"
+                (click)="registerInquiry()"
+              >
+                Consultar por WhatsApp
+              </a>
+              <a class="store-btn store-btn--ghost" routerLink="/catalogo">Seguir comprando</a>
+            </div>
+
+            @if (attributeEntries(p).length > 0) {
+              <section class="product-attrs" aria-label="Características">
+                <h2 class="product-attrs__title">Características</h2>
+                <dl class="product-attrs__list">
+                  @for (entry of attributeEntries(p); track entry.key) {
+                    <div class="product-attrs__row">
+                      <dt>{{ entry.key }}</dt>
+                      <dd>{{ entry.value }}</dd>
+                    </div>
+                  }
+                </dl>
+              </section>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</section>

@@ -1,0 +1,24 @@
+﻿@use '../shared/mega-form.base' as *;
+
+.mega-textarea {
+  &__control {
+    resize: vertical;
+    min-height: 4.5rem;
+    line-height: 1.5;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  &__count {
+    margin-left: auto;
+    font-size: 0.72rem;
+    color: var(--mega-text-muted, #8a939d);
+    font-variant-numeric: tabular-nums;
+  }
+}
+

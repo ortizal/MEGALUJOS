@@ -1,0 +1,171 @@
+<section class="page" aria-labelledby="documents-title">
+  <header class="page__header">
+    <div>
+      <h1 id="documents-title">Documentos electrónicos</h1>
+      <p>Comprobantes enviados al SRI: estado, eventos, RIDE y notas de crédito.</p>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <form class="toolbar toolbar--wrap" (ngSubmit)="applyFilters()" aria-label="Filtros de documentos">
+      <div style="min-width: 190px">
+        <mega-select
+          label="Estado"
+          name="docs-status"
+          [options]="statusOptions"
+          [ngModel]="status()"
+          (ngModelChange)="status.set($event)"
+        />
+      </div>
+      <div style="min-width: 170px">
+        <mega-select
+          label="Tipo"
+          name="docs-type"
+          [options]="typeOptions"
+          [ngModel]="documentType()"
+          (ngModelChange)="documentType.set($event)"
+        />
+      </div>
+      <div style="min-width: 160px">
+        <mega-date-picker
+          label="Desde"
+          name="docs-from"
+          [ngModel]="dateFrom()"
+          (ngModelChange)="dateFrom.set($event)"
+        />
+      </div>
+      <div style="min-width: 160px">
+        <mega-date-picker
+          label="Hasta"
+          name="docs-to"
+          [ngModel]="dateTo()"
+          (ngModelChange)="dateTo.set($event)"
+        />
+      </div>
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="applyFilters()" size="sm">Aplicar</mega-button>
+    </form>
+  </div>
+
+  <div class="mega-card mega-card--flush">
+    <mega-table
+      [columns]="columns()"
+      [rows]="rows()"
+      [loading]="loading()"
+      [rowKey]="rowKey"
+      emptyText="No hay documentos electrónicos."
+      (onRowClick)="openDetail($event.row)"
+      aria-label="Tabla de documentos electrónicos"
+    />
+
+    <ng-template #statusCell let-row>
+      <mega-status-badge [status]="row.status" />
+    </ng-template>
+
+    <ng-template #actionsCell let-row>
+      <div class="cell-actions">
+        <mega-button size="sm" variant="ghost" (click)="openDetail(row)">Ver</mega-button>
+        @if (row.status === 'AUTHORIZED') {
+          <mega-button size="sm" variant="outline" (click)="downloadRide(row)">RIDE</mega-button>
+        }
+        @if (canRetry(row)) {
+          <mega-button size="sm" variant="outline" (click)="retry(row)">Reintentar</mega-button>
+        }
+      </div>
+    </ng-template>
+  </div>
+
+  @if (!loading() && rows().length) {
+    <mega-pagination
+      [page]="page()"
+      [size]="size"
+      [total]="total()"
+      (pageChange)="goToPage($event)"
+      aria-label="Paginación de documentos"
+    />
+  }
+</section>
+
+<mega-modal
+  [open]="!!selected()"
+  [title]="'Documento ' + (selected()?.sequenceNumber ?? '')"
+  size="lg"
+  (close)="selected.set(null)"
+>
+  @if (selected(); as document) {
+    <dl class="detail-grid">
+      <div>
+        <dt>Tipo</dt>
+        <dd>{{ document.documentType }}</dd>
+      </div>
+      <div>
+        <dt>Estado</dt>
+        <dd><mega-status-badge [status]="document.status" /></dd>
+      </div>
+      <div>
+        <dt>Clave de acceso</dt>
+        <dd class="mono">{{ document.accessKey || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Autorización</dt>
+        <dd>{{ document.authorizationNumber || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Autorizado</dt>
+        <dd>{{ document.authorizedAt || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Error</dt>
+        <dd>{{ document.lastError || '—' }}</dd>
+      </div>
+    </dl>
+
+    <h3 class="section-title">Eventos</h3>
+    <div class="list-group-mega">
+      @for (event of document.events; track event.id) {
+        <div class="list-group-mega__item">
+          <strong>{{ event.stage || '—' }}</strong>
+          <mega-status-badge [status]="event.status" />
+          <span class="toolbar__spacer"></span>
+          <span class="text-muted-mega">{{ event.occurredAt }}</span>
+        </div>
+      } @empty {
+        <div class="list-group-mega__item text-muted-mega">Sin eventos registrados.</div>
+      }
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mt-3" megaModalFooter>
+      @if (document.status === 'AUTHORIZED') {
+        <mega-button variant="outline" (click)="downloadRide(document)">Descargar RIDE</mega-button>
+      }
+      <mega-button variant="secondary" (click)="openCreditModal()">Emitir nota de crédito</mega-button>
+      <mega-button variant="ghost" (click)="selected.set(null)">Cerrar</mega-button>
+    </div>
+  }
+</mega-modal>
+
+<mega-modal [open]="creditModal()" title="Nota de crédito" (close)="creditModal.set(false)">
+  <form class="d-grid gap-3" (ngSubmit)="submitCreditNote(selected()?.saleId)">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+    <mega-input
+      label="Código de motivo SRI"
+      name="credit-code"
+      placeholder="1 = Devolución de mercadería"
+      [ngModel]="creditReasonCode()"
+      (ngModelChange)="creditReasonCode.set($event)"
+    />
+    <mega-textarea
+      label="Motivo detallado"
+      name="credit-reason"
+      [rows]="3"
+      [ngModel]="creditReason()"
+      (ngModelChange)="creditReason.set($event)"
+    />
+  </form>
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="creditModal.set(false)">Cancelar</mega-button>
+    <mega-button (click)="submitCreditNote(selected()?.saleId)" [loading]="creditSubmitting()">
+      Emitir
+    </mega-button>
+  </div>
+</mega-modal>

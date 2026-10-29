@@ -1,0 +1,72 @@
+<section class="page" aria-labelledby="issuers-title">
+  <header class="page__header">
+    <div>
+      <h1 id="issuers-title">Emisor SRI</h1>
+      <p>Datos tributarios usados en comprobantes electrónicos.</p>
+    </div>
+    <div class="page__actions">
+      <mega-button (click)="save()" [loading]="saving()">Guardar emisor</mega-button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="state-box state-box--info" role="status">Cargando emisor…</div>
+  } @else {
+    <div class="mega-card">
+      @if (!issuer()) {
+        <p class="state-box state-box--warning">
+          Aún no hay emisor configurado. Completa los datos y guarda el primero.
+        </p>
+      }
+      <div class="form-grid">
+        <mega-input
+          label="RUC"
+          name="issuer-tax"
+          placeholder="1790012345001"
+          [ngModel]="taxId()"
+          (ngModelChange)="taxId.set($event)"
+        />
+        <mega-input
+          label="Razón social"
+          name="issuer-legal"
+          [ngModel]="legalName()"
+          (ngModelChange)="legalName.set($event)"
+        />
+        <mega-input
+          label="Nombre comercial (opcional)"
+          name="issuer-trade"
+          [ngModel]="tradeName()"
+          (ngModelChange)="tradeName.set($event)"
+        />
+        <mega-input
+          label="Código de establecimiento"
+          name="issuer-establishment"
+          placeholder="001"
+          [ngModel]="establishmentCode()"
+          (ngModelChange)="establishmentCode.set($event)"
+        />
+        <mega-input
+          label="Punto de emisión"
+          name="issuer-point"
+          placeholder="001"
+          [ngModel]="emissionPointCode()"
+          (ngModelChange)="emissionPointCode.set($event)"
+        />
+        <mega-select
+          label="Ambiente SRI"
+          name="issuer-environment"
+          [options]="environmentOptions"
+          [ngModel]="environment()"
+          (ngModelChange)="environment.set($event)"
+        />
+      </div>
+      <mega-textarea
+        label="Dirección principal"
+        name="issuer-address"
+        [rows]="2"
+        [ngModel]="mainAddress()"
+        (ngModelChange)="mainAddress.set($event)"
+      />
+    </div>
+  }
+</section>

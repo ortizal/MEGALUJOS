@@ -1,0 +1,126 @@
+.product-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--mega-text-secondary);
+
+  a {
+    color: var(--mega-text-secondary);
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--mega-red);
+    }
+  }
+}
+
+.product-layout {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 992px) {
+  .product-layout {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.product-info {
+  display: grid;
+  gap: 0.9rem;
+  align-content: start;
+}
+
+.product-info__sku {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--mega-text-muted);
+}
+
+.product-info__name {
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--mega-black);
+  margin: 0;
+}
+
+.product-info__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.product-info__tag {
+  padding: 0.2rem 0.7rem;
+  border-radius: var(--mega-radius-pill);
+  background: var(--mega-surface-alt);
+  color: var(--mega-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.product-info__description {
+  color: var(--mega-text-secondary);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.product-info__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.product-attrs {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background: var(--mega-surface);
+  border: 1px solid var(--mega-border);
+  border-radius: var(--mega-radius-lg);
+}
+
+.product-attrs__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--mega-black);
+  margin-bottom: 0.75rem;
+}
+
+.product-attrs__list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.product-attrs__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.4rem;
+  border-bottom: 1px dashed var(--mega-border);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  dt {
+    color: var(--mega-text-secondary);
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+    color: var(--mega-text);
+    text-align: right;
+  }
+}

@@ -1,0 +1,27 @@
+# Artefactos de compilación
+target/
+*.class
+*.jar
+*.war
+
+# Control de versiones / IDE
+.git/
+.gitignore
+.idea/
+.vscode/
+*.iml
+
+# Artefactos locales que no deben entrar a la imagen
+uploads/
+certificates/
+logs/
+*.log
+*.p12
+*.pfx
+*.key
+.env
+.env.*
+
+# Propios de Docker
+Dockerfile
+.dockerignore

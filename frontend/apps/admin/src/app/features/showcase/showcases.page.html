@@ -1,0 +1,122 @@
+<section class="page" aria-labelledby="showcases-title">
+  <header class="page__header">
+    <div>
+      <h1 id="showcases-title">Showcases</h1>
+      <p>Carruseles y vitrinas especiales del home.</p>
+    </div>
+  </header>
+
+  <div class="mega-card mega-card--flush">
+    <mega-table
+      [columns]="columns()"
+      [rows]="rows()"
+      [loading]="loading()"
+      [rowKey]="rowKey"
+      emptyText="Aún no hay showcases configurados."
+      aria-label="Tabla de showcases"
+    />
+
+    <ng-template #actionsCell let-row>
+      <div class="cell-actions">
+        <mega-button size="sm" variant="ghost" (click)="openEdit(row)">Editar</mega-button>
+      </div>
+    </ng-template>
+  </div>
+</section>
+
+<mega-modal
+  [open]="modalOpen()"
+  [title]="'Showcase ' + (editingCode() ?? '')"
+  size="lg"
+  (close)="modalOpen.set(false)"
+>
+  <form class="d-grid gap-3" (ngSubmit)="save()">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+    <mega-input
+      label="Código"
+      name="showcase-code"
+      [ngModel]="code()"
+      [ngModelOptions]="{ standalone: true }"
+      (ngModelChange)="code.set($event)"
+    />
+    <mega-input
+      label="Título"
+      name="showcase-title"
+      [ngModel]="title()"
+      (ngModelChange)="title.set($event)"
+    />
+    <mega-input
+      label="Descripción"
+      name="showcase-description"
+      [ngModel]="description()"
+      (ngModelChange)="description.set($event)"
+    />
+    <mega-input
+      label="Autoplay (segundos)"
+      name="showcase-autoplay"
+      type="number"
+      [ngModel]="autoplaySeconds()"
+      (ngModelChange)="autoplaySeconds.set($event)"
+    />
+    <div class="form-check">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        id="showcase-active"
+        [checked]="active()"
+        (change)="active.set($any($event.target).checked)"
+      />
+      <label class="form-check-label" for="showcase-active">Activo</label>
+    </div>
+  </form>
+
+  <h3 class="section-title mt-3">Productos destacados</h3>
+  <div class="toolbar toolbar--wrap">
+    <div class="toolbar__grow">
+      <mega-input
+        label="Agregar producto"
+        name="showcase-search"
+        type="search"
+        placeholder="Buscar por nombre o SKU"
+        [ngModel]="productSearch()"
+        [ngModelOptions]="{ standalone: true }"
+        (ngModelChange)="productSearch.set($event)"
+      />
+    </div>
+    <mega-button (click)="searchProducts()" [loading]="searching()" size="sm">Buscar</mega-button>
+  </div>
+
+  @if (productResults().length) {
+    <div class="list-group-mega mt-2">
+      @for (variant of productResults(); track variant.variantId) {
+        <div class="list-group-mega__item">
+          <span>{{ variant.label }}</span>
+          <span class="toolbar__spacer"></span>
+          <mega-button size="sm" variant="ghost" (click)="addProduct(variant)">Agregar</mega-button>
+        </div>
+      }
+    </div>
+  }
+
+  @if (productIds().length) {
+    <div class="list-group-mega mt-2">
+      @for (variantId of productIds(); track variantId) {
+        <div class="list-group-mega__item">
+          <span class="mono">{{ variantId.slice(0, 8) }}…</span>
+          <span class="toolbar__spacer"></span>
+          <mega-button size="sm" variant="ghost" (click)="removeProduct(variantId)">Quitar</mega-button>
+        </div>
+      }
+    </div>
+    <div class="d-flex justify-content-end mt-2">
+      <mega-button variant="secondary" size="sm" [loading]="replacing()" (click)="saveProducts()">
+        Guardar productos
+      </mega-button>
+    </div>
+  }
+
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="modalOpen.set(false)">Cerrar</mega-button>
+    <mega-button (click)="save()" [loading]="saving()">Guardar showcase</mega-button>
+  </div>
+</mega-modal>

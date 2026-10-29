@@ -1,0 +1,49 @@
+<section class="store-page-hero">
+  <div class="store-container">
+    <h1 class="store-page-hero__title">Servicios MEGALUJOS</h1>
+    <p class="store-page-hero__lead">
+      Detailing, instalación y protección con equipo especializado. Cotiza sin compromiso por
+      WhatsApp.
+    </p>
+  </div>
+</section>
+
+<section class="store-section">
+  <div class="store-container">
+    <div class="store-grid-cards">
+      @for (service of services; track service.title) {
+        <article class="store-card services-card">
+          <span class="services-card__icon" aria-hidden="true">{{ service.icon }}</span>
+          <h2 class="services-card__title">{{ service.title }}</h2>
+          <p class="services-card__text">{{ service.description }}</p>
+          <ul class="services-card__features">
+            @for (feature of service.features; track feature) {
+              <li>{{ feature }}</li>
+            }
+          </ul>
+          <p class="services-card__price">{{ service.priceFrom }}</p>
+          <a
+            class="store-btn store-btn--primary"
+            [href]="quoteUrl(service)"
+            target="_blank"
+            rel="noopener"
+            >Cotizar por WhatsApp</a
+          >
+        </article>
+      }
+    </div>
+
+    <div class="services-note store-card">
+      <div>
+        <h2 class="services-note__title">¿Necesitas algo específico?</h2>
+        <p class="services-note__text">
+          Trabajamos a medida: cuéntanos qué necesita tu vehículo y armamos una propuesta con
+          materiales, tiempos y precios.
+        </p>
+      </div>
+      <a class="store-btn store-btn--primary" [href]="quoteUrl()" target="_blank" rel="noopener"
+        >Hablar con un asesor</a
+      >
+    </div>
+  </div>
+</section>

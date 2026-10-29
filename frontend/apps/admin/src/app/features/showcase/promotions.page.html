@@ -1,0 +1,96 @@
+<section class="page" aria-labelledby="promotions-title">
+  <header class="page__header">
+    <div>
+      <h1 id="promotions-title">Promociones</h1>
+      <p>Descuentos visibles en la vitrina pública.</p>
+    </div>
+    <div class="page__actions">
+      <mega-button size="sm" (click)="openCreate()">+ Nueva promoción</mega-button>
+    </div>
+  </header>
+
+  <div class="mega-card mega-card--flush">
+    <mega-table
+      [columns]="columns()"
+      [rows]="rows()"
+      [loading]="loading()"
+      [rowKey]="rowKey"
+      emptyText="Aún no hay promociones."
+      aria-label="Tabla de promociones"
+    />
+
+    <ng-template #statusCell let-row>
+      <mega-status-badge
+        [status]="row.active ? 'AUTHORIZED' : 'PENDING'"
+        [customLabels]="{ AUTHORIZED: 'Activa', PENDING: 'Inactiva' }"
+        [customTones]="{ AUTHORIZED: 'success', PENDING: 'neutral' }"
+      />
+    </ng-template>
+
+    <ng-template #actionsCell let-row>
+      <div class="cell-actions">
+        <mega-button size="sm" variant="ghost" (click)="openEdit(row)">Editar</mega-button>
+      </div>
+    </ng-template>
+  </div>
+</section>
+
+<mega-modal
+  [open]="modalOpen()"
+  [title]="editingId() ? 'Editar promoción' : 'Nueva promoción'"
+  (close)="modalOpen.set(false)"
+>
+  <form class="d-grid gap-3" (ngSubmit)="save()">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+    <mega-input label="Nombre" name="promo-name" [ngModel]="name()" (ngModelChange)="name.set($event)" />
+    <mega-textarea
+      label="Descripción"
+      name="promo-description"
+      [rows]="2"
+      [ngModel]="description()"
+      (ngModelChange)="description.set($event)"
+    />
+    <mega-select
+      label="Tipo de descuento"
+      name="promo-type"
+      [options]="promoTypeOptions"
+      [ngModel]="promoType()"
+      (ngModelChange)="promoType.set($event)"
+    />
+    <mega-input
+      [label]="promoType() === 'PERCENTAGE' ? 'Valor (%)' : 'Valor (USD)'"
+      name="promo-value"
+      type="number"
+      [ngModel]="value()"
+      (ngModelChange)="value.set($event)"
+    />
+    <div class="form-grid">
+      <mega-date-picker
+        label="Desde"
+        name="promo-from"
+        [ngModel]="startsAt()"
+        (ngModelChange)="startsAt.set($event)"
+      />
+      <mega-date-picker
+        label="Hasta"
+        name="promo-to"
+        [ngModel]="endsAt()"
+        (ngModelChange)="endsAt.set($event)"
+      />
+    </div>
+    <div class="form-check">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        id="promo-active"
+        [checked]="active()"
+        (change)="active.set($any($event.target).checked)"
+      />
+      <label class="form-check-label" for="promo-active">Activa</label>
+    </div>
+  </form>
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="modalOpen.set(false)">Cancelar</mega-button>
+    <mega-button (click)="save()" [loading]="saving()">Guardar</mega-button>
+  </div>
+</mega-modal>

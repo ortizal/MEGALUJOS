@@ -1,0 +1,39 @@
+<section class="page" aria-labelledby="roles-title">
+  <header class="page__header">
+    <div>
+      <h1 id="roles-title">Roles y permisos</h1>
+      <p>Roles del sistema y los permisos asignados a cada uno.</p>
+    </div>
+  </header>
+
+  @if (error(); as message) {
+    <mega-empty-state
+      icon="⚠️"
+      title="No se pudieron cargar los roles"
+      [message]="message"
+      actionLabel="Reintentar"
+      (action)="load()"
+    />
+  } @else {
+    <div class="mega-card mega-card--flush">
+      <mega-table
+        [columns]="columns()"
+        [rows]="rows()"
+        [loading]="loading()"
+        [rowKey]="rowKey"
+        emptyText="No hay roles configurados."
+        aria-label="Tabla de roles y permisos"
+      />
+      <ng-template #permissionsCell let-row>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+          @for (code of permissionCodes(row); track code) {
+            <span class="badge-perm">{{ code }}</span>
+          }
+          @if (!hasPermissions(row)) {
+            <span style="color: var(--mega-text-muted); font-size: 0.8rem;">Sin permisos</span>
+          }
+        </div>
+      </ng-template>
+    </div>
+  }
+</section>

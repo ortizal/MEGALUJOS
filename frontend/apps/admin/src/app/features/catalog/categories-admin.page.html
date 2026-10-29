@@ -1,0 +1,79 @@
+﻿<section class="page" aria-labelledby="categories-title">
+  <header class="page__header">
+    <div>
+      <h1 id="categories-title">Categorías</h1>
+      <p>Jerarquía de categorías del catálogo público.</p>
+    </div>
+    <div class="page__actions">
+      <mega-button size="sm" (click)="openCreate()">+ Nueva categoría</mega-button>
+    </div>
+  </header>
+
+  <div class="mega-card mega-card--flush">
+    <mega-table
+      [columns]="columns()"
+      [rows]="rows()"
+      [loading]="loading()"
+      [rowKey]="rowKey"
+      emptyText="Aún no hay categorías. Crea la primera."
+      aria-label="Tabla de categorías"
+    />
+
+    <ng-template #actionsCell let-row>
+      <div class="cell-actions">
+        <mega-button size="sm" variant="ghost" (click)="openEdit(row)">Editar</mega-button>
+        <mega-button size="sm" variant="outline" (click)="toggleActive(row)">
+          {{ row.active ? 'Desactivar' : 'Activar' }}
+        </mega-button>
+      </div>
+    </ng-template>
+  </div>
+</section>
+
+<mega-modal
+  [open]="modalOpen()"
+  [title]="editingId() ? 'Editar categoría' : 'Nueva categoría'"
+  (close)="modalOpen.set(false)"
+>
+  <form class="d-grid gap-3" (ngSubmit)="save()">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+    <mega-input
+      label="Nombre"
+      name="category-name"
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)"
+    />
+    <mega-input
+      label="Slug (opcional)"
+      name="category-slug"
+      placeholder="Se genera desde el nombre"
+      [ngModel]="slug()"
+      (ngModelChange)="slug.set($event)"
+    />
+    <mega-select
+      label="Categoría padre"
+      name="category-parent"
+      [options]="parentOptions()"
+      [ngModel]="parentId()"
+      (ngModelChange)="parentId.set($event)"
+    />
+    <mega-input
+      label="Orden"
+      name="category-sort"
+      type="number"
+      [ngModel]="sortOrder()"
+      (ngModelChange)="sortOrder.set($event)"
+    />
+    <mega-textarea
+      label="Descripción (opcional)"
+      name="category-description"
+      [rows]="2"
+      [ngModel]="description()"
+      (ngModelChange)="description.set($event)"
+    />
+  </form>
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="modalOpen.set(false)">Cancelar</mega-button>
+    <mega-button (click)="save()" [loading]="saving()">Guardar</mega-button>
+  </div>
+</mega-modal>

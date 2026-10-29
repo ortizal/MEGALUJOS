@@ -1,0 +1,39 @@
+:host {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 1080;
+}
+
+.wa-fab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.1rem;
+  border-radius: var(--mega-radius-pill);
+  background: var(--mega-success);
+  color: var(--mega-white);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  box-shadow: var(--mega-shadow-lg);
+  transition:
+    background-color var(--mega-transition),
+    transform var(--mega-transition);
+
+  &:hover,
+  &:focus-visible {
+    background: #146c4a;
+    color: var(--mega-white);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .wa-fab__label {
+    display: none;
+  }
+
+  .wa-fab {
+    padding: 0.85rem;
+  }
+}

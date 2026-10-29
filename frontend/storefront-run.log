@@ -1,0 +1,134 @@
+npm notice run frontend@0.0.0 npx
+npm notice run ng serve storefront --port 4300
+❯ Building...
+✔ Building...
+Initial chunk files | Names                         | Raw size
+main.js             | main                          | 31.40 kB | 
+styles.css          | styles                        | 29.80 kB | 
+chunk-GOMI4DH3.js   | -                             |  1.42 kB | 
+chunk-PTODLRCV.js   | -                             |  1.28 kB | 
+
+                    | Initial total                 | 63.90 kB
+
+Lazy chunk files    | Names                         | Raw size
+chunk-SCRBNR2N.js   | product-detail-page-component | 47.30 kB | 
+chunk-N6I2XU3K.js   | catalog-page-component        | 46.43 kB | 
+chunk-LKBTBDW3.js   | home-page-component           | 26.97 kB | 
+chunk-2TE3XIRZ.js   | vehicles-page-component       | 23.56 kB | 
+chunk-6SN7JV2V.js   | -                             | 23.26 kB | 
+chunk-QBIFLQGR.js   | -                             | 19.97 kB | 
+chunk-SDCHBPJG.js   | -                             | 17.26 kB | 
+chunk-73ZHPTTT.js   | tv-mode-page-component        | 16.68 kB | 
+chunk-T4RLIC3M.js   | promotions-page-component     | 15.31 kB | 
+chunk-EDZMIUOP.js   | services-page-component       | 12.29 kB | 
+chunk-4O75KCTJ.js   | contact-page-component        | 11.84 kB | 
+chunk-6WXFQMVB.js   | -                             |  8.95 kB | 
+chunk-VJETRBIP.js   | -                             |  8.57 kB | 
+chunk-ILOWYMGB.js   | -                             |  3.28 kB | 
+chunk-GVK4CUEL.js   | -                             |  2.07 kB | 
+...and 1 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [2.482 seconds] - 2026-10-28T16:43:12.058Z
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    apps/storefront/src/styles.scss:1:8:
+[37m      1 │ @import [32m[37m'bootstrap/scss/functions';
+        ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 │ @import [32m'apps/storefront/src/styles.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    apps/storefront/src/styles.scss:2:8:
+[37m      2 │ @import [32m[37m'bootstrap/scss/variables';
+        ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 │ @import [32m'apps/storefront/src/styles.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    apps/storefront/src/styles.scss:3:8:
+[37m      3 │ @import [32m[37m'bootstrap/scss/variables-dark';
+        ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 │ @import [32m'apps/storefront/src/styles.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    apps/storefront/src/styles.scss:4:8:
+[37m      4 │ @import [32m[37m'bootstrap/scss/maps';
+        ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 │ @import [32m'apps/storefront/src/styles.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDeprecation[0m [1m[35m[plugin angular-sass][0m
+
+    apps/storefront/src/styles.scss:5:8:
+[37m      5 │ @import [32m[37m'bootstrap/scss/mixins';
+        ╵         [32m^[0m
+
+
+  Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+  
+  More info and automated migrator: [4mhttps://sass-lang.com/d/import[0m
+
+  The plugin "angular-sass" was triggered by this import
+
+    angular:styles/global:styles:1:8:
+[37m      1 │ @import [32m'apps/storefront/src/styles.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m4 repetitive deprecation warnings omitted.
+Run in verbose mode to see all warnings.[0m [1m[35m[plugin angular-sass][0m
+
+    angular:styles/global:styles:1:8:
+[37m      1 │ @import [32m'apps/storefront/src/styles.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+[2m11:43:12 a. m.[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m4300[22m/[39m

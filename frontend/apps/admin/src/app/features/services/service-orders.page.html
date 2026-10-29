@@ -1,0 +1,119 @@
+<section class="page" aria-labelledby="service-orders-title">
+  <header class="page__header">
+    <div>
+      <h1 id="service-orders-title">Órdenes de servicio</h1>
+      <p>Stickers, instalaciones y trabajos a medida.</p>
+    </div>
+    <div class="page__actions">
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/servicios/agenda">Ver agenda</a>
+      <mega-button size="sm" (click)="openCreate()">+ Nueva orden</mega-button>
+    </div>
+  </header>
+
+  <div class="mega-card">
+    <form class="toolbar" (ngSubmit)="applyFilters()" aria-label="Filtros de órdenes">
+      <div class="toolbar__grow">
+        <mega-input
+          label="Buscar"
+          name="orders-q"
+          type="search"
+          placeholder="Número o cliente"
+          [ngModel]="query()"
+          (ngModelChange)="query.set($event)"
+        />
+      </div>
+      <div style="min-width: 200px">
+        <mega-select
+          label="Estado"
+          name="orders-status"
+          [options]="statusOptions"
+          [ngModel]="status()"
+          (ngModelChange)="status.set($event)"
+        />
+      </div>
+      <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+      <mega-button (click)="applyFilters()" size="sm">Aplicar</mega-button>
+    </form>
+  </div>
+
+  <div class="mega-card mega-card--flush">
+    <mega-table
+      [columns]="columns()"
+      [rows]="rows()"
+      [loading]="loading()"
+      [rowKey]="rowKey"
+      emptyText="No hay órdenes con estos filtros."
+      (onRowClick)="openDetail($event.row)"
+      aria-label="Tabla de órdenes de servicio"
+    />
+
+    <ng-template #statusCell let-row>
+      <mega-status-badge
+        [status]="row.status"
+        [customLabels]="statusLabels"
+        [customTones]="statusTones"
+      />
+    </ng-template>
+  </div>
+
+  @if (!loading() && rows().length) {
+    <mega-pagination
+      [page]="page()"
+      [size]="size"
+      [total]="total()"
+      (pageChange)="goToPage($event)"
+      aria-label="Paginación de órdenes"
+    />
+  }
+</section>
+
+<mega-modal [open]="createOpen()" title="Nueva orden de servicio" (close)="createOpen.set(false)">
+  <form class="d-grid gap-3" (ngSubmit)="create()">
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true"></button>
+    <mega-select
+      label="Cliente"
+      name="order-customer"
+      [options]="customerOptions()"
+      [ngModel]="customerId()"
+      (ngModelChange)="customerId.set($event)"
+    />
+    <mega-select
+      label="Tipo de trabajo"
+      name="order-type"
+      [options]="typeOptions"
+      [ngModel]="serviceType()"
+      (ngModelChange)="serviceType.set($event)"
+    />
+    <mega-textarea
+      label="Descripción del trabajo"
+      name="order-description"
+      [rows]="3"
+      [ngModel]="description()"
+      (ngModelChange)="description.set($event)"
+    />
+    <mega-input
+      label="Dimensiones (opcional)"
+      name="order-dimensions"
+      placeholder="Ej. 1.20 m × 0.80 m"
+      [ngModel]="dimensions()"
+      (ngModelChange)="dimensions.set($event)"
+    />
+    <mega-input
+      label="Mano de obra (USD)"
+      name="order-labor"
+      type="number"
+      [ngModel]="laborAmount()"
+      (ngModelChange)="laborAmount.set($event)"
+    />
+    <mega-date-picker
+      label="Fecha programada (opcional)"
+      name="order-scheduled"
+      [ngModel]="scheduledAt()"
+      (ngModelChange)="scheduledAt.set($event)"
+    />
+  </form>
+  <div class="d-flex justify-content-end gap-2 mt-3" megaModalFooter>
+    <mega-button variant="ghost" (click)="createOpen.set(false)">Cancelar</mega-button>
+    <mega-button (click)="create()" [loading]="creating()">Crear orden</mega-button>
+  </div>
+</mega-modal>
