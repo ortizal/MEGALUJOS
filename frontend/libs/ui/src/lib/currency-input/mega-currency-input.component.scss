@@ -1,13 +1,17 @@
 ﻿@use '../shared/mega-form.base' as *;
 
+// mega-currency-input emite `input-group input-group-sm` de Bootstrap 5
+// (prefijo `$`, campo y sufijo de moneda) + `form-control form-control-sm`.
+// Aquí solo se afina la tipografía numérica y el padding del campo.
+
 .mega-currency-input {
-  &__prefix {
-    display: inline-flex;
-    align-items: center;
-    padding-left: 0.75rem;
-    font-weight: 700;
-    font-size: 0.9rem;
+  &__prefix,
+  &__suffix {
+    font-size: 0.8rem;
+    font-weight: 600;
     color: var(--mega-text-secondary, #5b636d);
+    background: var(--mega-surface-alt, #eef1f4);
+    border-color: var(--mega-border, #dde2e7);
     user-select: none;
   }
 
@@ -15,17 +19,5 @@
     font-variant-numeric: tabular-nums;
     font-weight: 600;
     text-align: right;
-    padding-left: 0.35rem;
-  }
-
-  &__suffix {
-    display: inline-flex;
-    align-items: center;
-    padding-right: 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--mega-text-muted, #8a939d);
-    user-select: none;
   }
 }
-

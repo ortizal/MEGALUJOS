@@ -140,17 +140,21 @@
           (ngModelChange)="form.set({ ...form(), phone: $event })"
         />
         <div class="field--full">
-          <div class="admin-label">Roles</div>
-          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+          <div class="admin-label" id="user-roles-label">Roles</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;" role="group" aria-labelledby="user-roles-label">
             @for (role of roleOptions(); track role.value) {
-              <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+              <div class="form-check">
                 <input
+                  class="form-check-input"
                   type="checkbox"
+                  [id]="'role-' + role.value"
                   [checked]="isRoleSelected(role.value)"
-                  (change)="toggleRole(role.value, $event.target.checked)"
+                  (change)="toggleRole(role.value, $any($event.target).checked)"
                 />
-                {{ role.label }}
-              </label>
+                <label class="form-check-label" [for]="'role-' + role.value">
+                  {{ role.label }}
+                </label>
+              </div>
             }
           </div>
         </div>

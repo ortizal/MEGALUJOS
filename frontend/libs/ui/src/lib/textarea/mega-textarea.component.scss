@@ -1,12 +1,10 @@
 ﻿@use '../shared/mega-form.base' as *;
 
-.mega-textarea {
-  &__control {
-    resize: vertical;
-    min-height: 4.5rem;
-    line-height: 1.5;
-  }
+// mega-textarea emite `form-control form-control-sm` de Bootstrap 5.
+// Aquí solo se afina lo propio: resize vertical, altura mínima y el contador
+// de caracteres en el pie del campo.
 
+.mega-textarea {
   &__footer {
     display: flex;
     align-items: baseline;
@@ -22,3 +20,9 @@
   }
 }
 
+.mega-field-control.form-control {
+  resize: vertical;
+  min-height: 4.5rem;
+  line-height: 1.5;
+  border-radius: var(--mega-radius-sm, 12px);
+}

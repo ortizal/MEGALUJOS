@@ -1,9 +1,11 @@
-import { Component, forwardRef, input, signal } from '@angular/core';
+import { Component, computed, forwardRef, input, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { megaUid } from '../shared/mega-format';
+import { MegaFieldState } from '../shared/mega-field-state';
 
 /**
- * Selector de fecha MEGALUJOS (input date nativo estilizado).
+ * Selector de fecha MEGALUJOS (input date nativo sobre Bootstrap 5).
+ * Emite `form-control form-control-sm` + la clase de estado de Bootstrap.
  * ControlValueAccessor: emite/recibe ISO date string `yyyy-MM-dd`.
  */
 @Component({
@@ -19,31 +21,35 @@ import { megaUid } from '../shared/mega-format';
   ],
   template: `
     @if (label()) {
-      <label class="mega-field__label" [for]="id()">{{ label() }}</label>
+      <label class="form-label mega-field__label" [for]="id()">{{ label() }}</label>
     }
-    <div class="mega-control mega-control--date" [class.mega-control--invalid]="isInvalid()">
+    <div class="input-group input-group-sm" [class.has-validation]="showInvalid()">
       <input
-        class="mega-control__field mega-date-picker__field"
+        class="form-control form-control-sm mega-field-control mega-date-picker__field"
+        [class.is-valid]="currentState() === 'valid'"
+        [class.is-invalid]="showInvalid()"
+        [class.is-warning]="currentState() === 'warning'"
         [attr.id]="id()"
         type="date"
         [attr.min]="min() || null"
         [attr.max]="max() || null"
         [attr.aria-label]="ariaLabel() || label() || 'Fecha'"
         [attr.aria-describedby]="describedBy()"
-        [attr.aria-invalid]="isInvalid() ? 'true' : null"
+        [attr.aria-invalid]="showInvalid() ? 'true' : null"
         [disabled]="disabled()"
         [value]="value()"
         (input)="onInput($event)"
         (blur)="onTouched()"
       />
-      <svg class="mega-date-picker__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-        <rect x="1.5" y="3" width="13" height="11.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.4" />
-        <path d="M1.5 6.5h13M5 1.5v3M11 1.5v3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
-      </svg>
+      @if (showInvalid() && error()) {
+        <div class="invalid-feedback" [attr.id]="errorId()">{{ error() }}</div>
+      } @else if (currentState() === 'valid' && validMessage()) {
+        <div class="valid-feedback" [attr.id]="hintId()">{{ validMessage() }}</div>
+      } @else if (currentState() === 'warning' && warningMessage()) {
+        <div class="mega-warning-feedback" [attr.id]="hintId()">{{ warningMessage() }}</div>
+      }
     </div>
-    @if (isInvalid() && error()) {
-      <p class="mega-field__hint mega-field__hint--error" [attr.id]="errorId()">{{ error() }}</p>
-    } @else if (hint()) {
+    @if (!showInvalid() && currentState() !== 'valid' && currentState() !== 'warning' && hint()) {
       <p class="mega-field__hint" [attr.id]="hintId()">{{ hint() }}</p>
     }
   `,
@@ -57,6 +63,15 @@ export class MegaDatePickerComponent implements ControlValueAccessor {
 
   /** Mensaje de error (estado inválido). */
   error = input<string | null>(null);
+
+  /** Estado explícito de validación (anula `error` si ambos se pasan). */
+  state = input<MegaFieldState>(null);
+
+  /** Mensaje mostrado cuando `state` es `valid`. */
+  validMessage = input<string | null>(null);
+
+  /** Mensaje mostrado cuando `state` es `warning`. */
+  warningMessage = input<string | null>(null);
 
   /** Fecha mínima admitida (ISO date). */
   min = input<string | null>(null);
@@ -78,6 +93,15 @@ export class MegaDatePickerComponent implements ControlValueAccessor {
   onChange: (value: string) => void = () => {};
   onTouched: () => void = () => {};
 
+  /** Estado efectivo: `error` implícito se traduce a `invalid`. */
+  readonly effectiveState = computed<MegaFieldState>(() => {
+    const explicit = this.state();
+    if (explicit) {
+      return explicit;
+    }
+    return this.error() ? 'invalid' : null;
+  });
+
   writeValue(value: string | null | undefined): void {
     this.value.set(value ?? '');
   }
@@ -94,8 +118,13 @@ export class MegaDatePickerComponent implements ControlValueAccessor {
     this.disabled.set(isDisabled);
   }
 
-  isInvalid(): boolean {
-    return !!this.error();
+  /** Estado efectivo del campo (resuelve `state` o `error`). */
+  currentState(): MegaFieldState {
+    return this.effectiveState();
+  }
+
+  showInvalid(): boolean {
+    return this.effectiveState() === 'invalid';
   }
 
   hintId(): string {
@@ -107,8 +136,12 @@ export class MegaDatePickerComponent implements ControlValueAccessor {
   }
 
   describedBy(): string | null {
-    if (this.isInvalid() && this.error()) {
+    const st = this.effectiveState();
+    if (st === 'invalid' && this.error()) {
       return this.errorId();
+    }
+    if ((st === 'valid' && this.validMessage()) || (st === 'warning' && this.warningMessage())) {
+      return this.hintId();
     }
     return this.hint() ? this.hintId() : null;
   }

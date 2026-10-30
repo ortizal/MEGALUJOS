@@ -1,27 +1,21 @@
+// Botón MEGALUJOS sobre Bootstrap 5.
+// El host ya lleva `btn btn-sm|btn-md` + la clase de variante de Bootstrap,
+// así que aquí solo se resuelve lo que Bootstrap no trae: la variante ghost,
+// el spinner de carga y el layout interno.
+
 .mega-button {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
   font-family: var(--mega-font, 'Inter', sans-serif);
   font-weight: 600;
-  line-height: 1.2;
-  border: 1px solid transparent;
   border-radius: var(--mega-radius-sm, 12px);
-  cursor: pointer;
   transition: background-color var(--mega-transition, 180ms ease),
     border-color var(--mega-transition, 180ms ease), color var(--mega-transition, 180ms ease),
     box-shadow var(--mega-transition, 180ms ease);
 
-  &--md {
+  // Tamaño md propio (Bootstrap solo trae hasta sm para btn)
+  &.btn-md {
     padding: 0.6rem 1.15rem;
     font-size: 0.925rem;
-  }
-
-  &--sm {
-    padding: 0.375rem 0.8rem;
-    font-size: 0.825rem;
   }
 
   &--block {
@@ -29,67 +23,38 @@
     width: 100%;
   }
 
-  &--primary {
-    background: var(--mega-red, #d71920);
-    color: var(--mega-white, #fff);
-
-    &:hover:not(:disabled) {
-      background: var(--mega-red-hover, #b9141a);
-    }
-
-    &:active:not(:disabled) {
-      background: var(--mega-red-hover, #b9141a);
-      transform: translateY(1px);
-    }
-  }
-
-  &--secondary {
-    background: var(--mega-carbon, #1b1f25);
-    color: var(--mega-white, #fff);
-
-    &:hover:not(:disabled) {
-      background: var(--mega-black, #111318);
-    }
-  }
-
-  &--outline {
+  // Variante fantasma: transparente, sin borde, sutil
+  &.mega-btn-ghost {
     background: transparent;
-    border-color: var(--mega-border, #dde2e7);
-    color: var(--mega-text, #22262c);
-
-    &:hover:not(:disabled) {
-      border-color: var(--mega-red, #d71920);
-      color: var(--mega-red, #d71920);
-    }
-  }
-
-  &--ghost {
-    background: transparent;
+    border-color: transparent;
     color: var(--mega-text-secondary, #5b636d);
 
     &:hover:not(:disabled) {
       background: var(--mega-surface-alt, #eef1f4);
       color: var(--mega-text, #22262c);
     }
-  }
 
-  &--danger {
-    background: var(--mega-red, #d71920);
-    color: var(--mega-white, #fff);
-
-    &:hover:not(:disabled) {
-      filter: brightness(0.92);
+    &:focus-visible:not(:disabled) {
+      background: var(--mega-surface-alt, #eef1f4);
     }
   }
 
-  &:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
+  // Variante outline: conserva el borde neutro de la paleta MEGALUJOS
+  &.btn-outline-secondary {
+    border-color: var(--mega-border, #dde2e7);
+    color: var(--mega-text, #22262c);
+
+    &:hover:not(:disabled) {
+      border-color: var(--mega-red, #d71920);
+      color: var(--mega-red, #d71920);
+      background: transparent;
+    }
   }
 
+  // Focus rojo de marca (Bootstrap usa el color primario por defecto)
   &:focus-visible {
-    outline: 2px solid var(--mega-red, #d71920);
-    outline-offset: 2px;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(215, 25, 32, 0.28);
   }
 
   &__spinner {

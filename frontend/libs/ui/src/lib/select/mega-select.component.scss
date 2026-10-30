@@ -1,35 +1,5 @@
 ﻿@use '../shared/mega-form.base' as *;
 
-.mega-select {
-  position: relative;
-
-  &__control {
-    appearance: none;
-    width: 100%;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-family: var(--mega-font, 'Inter', sans-serif);
-    font-size: 0.925rem;
-    line-height: 1.5;
-    color: var(--mega-text, #22262c);
-    padding: 0.55rem 2.25rem 0.55rem 0.75rem;
-    cursor: pointer;
-
-    &:disabled {
-      cursor: not-allowed;
-    }
-  }
-
-  &__chevron {
-    position: absolute;
-    right: 0.7rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1rem;
-    height: 1rem;
-    color: var(--mega-text-muted, #8a939d);
-    pointer-events: none;
-  }
-}
-
+// mega-select emite `form-select form-select-sm` de Bootstrap 5, que ya
+// incluye el chevron y los estados is-valid/is-invalid/is-warning.
+// Solo se hereda la identidad de marca desde mega-form.base.

@@ -1,4 +1,9 @@
-// Estilos base compartidos de campos de formulario.
+// Estilos base compartidos de campos de formulario MEGALUJOS.
+// Los controles usan las clases nativas de Bootstrap 5 (form-control,
+// form-select, input-group, is-valid/is-invalid/is-warning) para que los
+// estados se vean en todo el sistema; aquí se afina la identidad de marca
+// (tipografía, labels sm y estados con la paleta MEGALUJOS).
+//
 // Inyectar en el SCSS del componente con:
 //   @use '../shared/mega-form.base' as *;
 
@@ -6,8 +11,10 @@
   &__label {
     display: block;
     font-family: var(--mega-font, 'Inter', sans-serif);
+    // Label sm (contrato: todos los campos en tamaño pequeño)
     font-size: 0.8rem;
     font-weight: 600;
+    line-height: 1.3;
     color: var(--mega-text-secondary, #5b636d);
     margin-bottom: 0.35rem;
   }
@@ -21,57 +28,50 @@
       color: var(--mega-red, #d71920);
       font-weight: 500;
     }
+
+    &--success {
+      color: var(--mega-success, #18855b);
+      font-weight: 500;
+    }
+
+    &--warning {
+      color: var(--mega-warning, #b66a00);
+      font-weight: 500;
+    }
   }
 }
 
-// Caja de control (select, textarea, date, currency)
-.mega-control {
-  display: flex;
-  align-items: stretch;
-  position: relative;
-  background: var(--mega-surface, #fff);
-  border: 1px solid var(--mega-border, #dde2e7);
-  border-radius: var(--mega-radius-sm, 12px);
-  transition: border-color var(--mega-transition, 180ms ease),
-    box-shadow var(--mega-transition, 180ms ease);
+// Los estados is-valid / is-invalid / is-warning vienen de Bootstrap 5.
+// Solo se afina el aro de foco con el color de marca MEGALUJOS.
+.mega-field-control {
+  &.form-control.is-valid,
+  &.form-control.is-invalid,
+  &.form-control.is-warning,
+  &.form-select.is-valid,
+  &.form-select.is-invalid,
+  &.form-select.is-warning {
+    box-shadow: none;
 
-  &:hover {
-    border-color: var(--mega-silver, #aeb4bc);
-  }
-
-  &:focus-within {
-    border-color: var(--mega-red, #d71920);
-    box-shadow: 0 0 0 3px rgba(215, 25, 32, 0.18);
-  }
-
-  &--invalid,
-  &:has([aria-invalid='true']) {
-    border-color: var(--mega-red, #d71920);
-  }
-
-  &:has(:disabled) {
-    opacity: 0.6;
-    background: var(--mega-surface-alt, #eef1f4);
-  }
-
-  &__field {
-    flex: 1;
-    min-width: 0;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-family: var(--mega-font, 'Inter', sans-serif);
-    font-size: 0.925rem;
-    line-height: 1.5;
-    color: var(--mega-text, #22262c);
-    padding: 0.55rem 0.75rem;
-
-    &::placeholder {
-      color: var(--mega-text-muted, #8a939d);
-    }
-
-    &:disabled {
-      cursor: not-allowed;
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(215, 25, 32, 0.15);
     }
   }
+
+  &.is-valid:focus {
+    box-shadow: 0 0 0 3px rgba(24, 133, 91, 0.18) !important;
+  }
+
+  &.is-warning:focus {
+    box-shadow: 0 0 0 3px rgba(182, 106, 0, 0.18) !important;
+  }
+}
+
+// Feedback de advertencia (Bootstrap no trae variante warning; es el
+// equivalente a .valid-feedback / .invalid-feedback pero en ámbar).
+.mega-warning-feedback {
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--mega-warning, #b66a00);
+  font-weight: 500;
 }

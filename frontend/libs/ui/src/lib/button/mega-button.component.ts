@@ -1,16 +1,46 @@
-import { Component, booleanAttribute, input } from '@angular/core';
+import { Component, booleanAttribute, computed, input } from '@angular/core';
 
-export type MegaButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+export type MegaButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'outline'
+  | 'ghost'
+  | 'danger'
+  | 'success'
+  | 'warning'
+  | 'info';
 export type MegaButtonSize = 'sm' | 'md';
 
+/** Clases Bootstrap 5 por variante (paleta MEGALUJOS en primary/danger). */
+const VARIANT_CLASS: Record<MegaButtonVariant, string> = {
+  primary: 'btn-primary',
+  secondary: 'btn-secondary',
+  outline: 'btn-outline-secondary',
+  ghost: 'mega-btn-ghost',
+  danger: 'btn-danger',
+  success: 'btn-success',
+  warning: 'btn-warning',
+  info: 'btn-info',
+};
+
 /**
- * Botón MEGALUJOS: variantes primary (rojo), secondary, outline, ghost, danger;
- * tamaños sm/md; estado de carga con spinner y disabled accesible.
+ * Botón MEGALUJOS sobre Bootstrap 5.
+ * Emite `btn btn-sm|btn-md` + la clase de variante de Bootstrap, de modo que
+ * en todo el sistema los botones son sm y muestran los estados de Bootstrap
+ * (primary/danger/success/warning/info/outline). La variante `primary` usa el
+ * rojo de marca; `ghost` es un helper propio.
+ * Incluye estado de carga con spinner y disabled accesible.
  */
 @Component({
   selector: 'mega-button',
   standalone: true,
   styleUrl: './mega-button.component.scss',
+  host: {
+    '[class]': 'hostClasses()',
+    '[attr.aria-busy]': `loading() ? 'true' : null`,
+    '[attr.disabled]': 'isDisabled() ? "" : null',
+    '[attr.type]': 'type()',
+  },
   template: `
     <span class="mega-button__spinner" aria-hidden="true" [attr.hidden]="!loading()">
       <svg viewBox="0 0 24 24" fill="none" focusable="false">
@@ -29,11 +59,11 @@ export type MegaButtonSize = 'sm' | 'md';
   `,
 })
 export class MegaButtonComponent {
-  /** Variante visual. */
+  /** Variante visual (mapea a una clase de botón de Bootstrap 5). */
   variant = input<MegaButtonVariant>('primary');
 
-  /** Tamaño del botón. */
-  size = input<MegaButtonSize>('md');
+  /** Tamaño del botón. Por defecto `sm` (estándar de todo el sistema). */
+  size = input<MegaButtonSize>('sm');
 
   /** Estado de carga: deshabilita el botón y muestra spinner (aria-busy). */
   loading = input(false, { transform: booleanAttribute });
@@ -44,8 +74,16 @@ export class MegaButtonComponent {
   /** Ancho completo del contenedor. */
   block = input(false, { transform: booleanAttribute });
 
-  /** Tipo nativo del botón. */
+  /** Tipo nativo del botón (submit por defecto dentro de formularios). */
   type = input<'button' | 'submit' | 'reset'>('button');
+
+  /** Clases completas del host: base + Bootstrap + variante + modificadores. */
+  readonly hostClasses = computed(() => {
+    const sizeCls = this.size() === 'md' ? 'btn-md' : 'btn-sm';
+    const blockCls = this.block() ? 'mega-button--block' : '';
+    const variantCls = VARIANT_CLASS[this.variant()] ?? 'btn-primary';
+    return ['mega-button', 'btn', sizeCls, variantCls, blockCls].filter(Boolean).join(' ');
+  });
 
   /** true cuando el botón no admite interacción. */
   isDisabled(): boolean {

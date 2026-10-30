@@ -1,9 +1,12 @@
-import { Component, forwardRef, input, signal } from '@angular/core';
+import { Component, computed, forwardRef, input, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { megaUid } from '../shared/mega-format';
+import { MegaFieldState } from '../shared/mega-field-state';
 
 /**
- * Área de texto MEGALUJOS (ControlValueAccessor) con label, hint y error.
+ * Área de texto MEGALUJOS (ControlValueAccessor) sobre Bootstrap 5.
+ * Emite `form-control form-control-sm` + la clase de estado de Bootstrap
+ * (`is-valid` / `is-invalid` / `is-warning`), con label, hint y error.
  */
 @Component({
   selector: 'mega-textarea',
@@ -18,28 +21,33 @@ import { megaUid } from '../shared/mega-format';
   ],
   template: `
     @if (label()) {
-      <label class="mega-field__label" [for]="id()">{{ label() }}</label>
+      <label class="form-label mega-field__label" [for]="id()">{{ label() }}</label>
     }
-    <div class="mega-control mega-control--textarea" [class.mega-control--invalid]="isInvalid()">
-      <textarea
-        class="mega-control__field mega-textarea__control"
-        [attr.id]="id()"
-        [attr.placeholder]="placeholder() || null"
-        [attr.rows]="rows()"
-        [attr.aria-label]="ariaLabel() || null"
-        [attr.aria-describedby]="describedBy()"
-        [attr.aria-invalid]="isInvalid() ? 'true' : null"
-        [attr.maxlength]="maxlength() || null"
-        [readonly]="readonly()"
-        [disabled]="disabled()"
-        [value]="value()"
-        (input)="onInput($event)"
-        (blur)="onTouched()"
-      ></textarea>
-    </div>
+    <textarea
+      class="form-control form-control-sm mega-field-control"
+      [class.is-valid]="currentState() === 'valid'"
+      [class.is-invalid]="showInvalid()"
+      [class.is-warning]="currentState() === 'warning'"
+      [attr.id]="id()"
+      [attr.placeholder]="placeholder() || null"
+      [attr.rows]="rows()"
+      [attr.aria-label]="ariaLabel() || null"
+      [attr.aria-describedby]="describedBy()"
+      [attr.aria-invalid]="showInvalid() ? 'true' : null"
+      [attr.maxlength]="maxlength() || null"
+      [readonly]="readonly()"
+      [disabled]="disabled()"
+      [value]="value()"
+      (input)="onInput($event)"
+      (blur)="onTouched()"
+    ></textarea>
     <div class="mega-textarea__footer">
-      @if (isInvalid() && error()) {
-        <p class="mega-field__hint mega-field__hint--error" [attr.id]="errorId()">{{ error() }}</p>
+      @if (showInvalid() && error()) {
+        <div class="invalid-feedback d-block" [attr.id]="errorId()">{{ error() }}</div>
+      } @else if (currentState() === 'valid' && validMessage()) {
+        <div class="valid-feedback d-block" [attr.id]="hintId()">{{ validMessage() }}</div>
+      } @else if (currentState() === 'warning' && warningMessage()) {
+        <div class="mega-warning-feedback" [attr.id]="hintId()">{{ warningMessage() }}</div>
       } @else if (hint()) {
         <p class="mega-field__hint" [attr.id]="hintId()">{{ hint() }}</p>
       }
@@ -60,6 +68,15 @@ export class MegaTextareaComponent implements ControlValueAccessor {
 
   /** Mensaje de error (estado inválido). */
   error = input<string | null>(null);
+
+  /** Estado explícito de validación (anula `error` si ambos se pasan). */
+  state = input<MegaFieldState>(null);
+
+  /** Mensaje mostrado cuando `state` es `valid`. */
+  validMessage = input<string | null>(null);
+
+  /** Mensaje mostrado cuando `state` es `warning`. */
+  warningMessage = input<string | null>(null);
 
   /** Filas visibles. */
   rows = input(4);
@@ -87,6 +104,15 @@ export class MegaTextareaComponent implements ControlValueAccessor {
   onChange: (value: string) => void = () => {};
   onTouched: () => void = () => {};
 
+  /** Estado efectivo: `error` implícito se traduce a `invalid`. */
+  readonly effectiveState = computed<MegaFieldState>(() => {
+    const explicit = this.state();
+    if (explicit) {
+      return explicit;
+    }
+    return this.error() ? 'invalid' : null;
+  });
+
   writeValue(value: string | null | undefined): void {
     this.value.set(value ?? '');
   }
@@ -103,8 +129,13 @@ export class MegaTextareaComponent implements ControlValueAccessor {
     this.disabled.set(isDisabled);
   }
 
-  isInvalid(): boolean {
-    return !!this.error();
+  /** Estado efectivo del campo (resuelve `state` o `error`). */
+  currentState(): MegaFieldState {
+    return this.effectiveState();
+  }
+
+  showInvalid(): boolean {
+    return this.effectiveState() === 'invalid';
   }
 
   hintId(): string {
@@ -116,8 +147,12 @@ export class MegaTextareaComponent implements ControlValueAccessor {
   }
 
   describedBy(): string | null {
-    if (this.isInvalid() && this.error()) {
+    const st = this.effectiveState();
+    if (st === 'invalid' && this.error()) {
       return this.errorId();
+    }
+    if ((st === 'valid' && this.validMessage()) || (st === 'warning' && this.warningMessage())) {
+      return this.hintId();
     }
     return this.hint() ? this.hintId() : null;
   }

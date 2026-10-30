@@ -1,6 +1,7 @@
-import { Component, forwardRef, input, signal } from '@angular/core';
+import { Component, computed, forwardRef, input, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { megaUid } from '../shared/mega-format';
+import { MegaFieldState } from '../shared/mega-field-state';
 
 /** Opción simple del select. */
 export interface MegaSelectOption {
@@ -10,8 +11,10 @@ export interface MegaSelectOption {
 }
 
 /**
- * Selector MEGALUJOS (ControlValueAccessor).
- * Acepta `options` como arreglo o `<option>` proyectados dentro del `<select>`.
+ * Selector MEGALUJOS (ControlValueAccessor) sobre Bootstrap 5.
+ * Emite `form-select form-select-sm` + la clase de estado de Bootstrap
+ * (`is-valid` / `is-invalid` / `is-warning`). Acepta `options` como arreglo
+ * o `<option>` proyectados dentro del `<select>`.
  */
 @Component({
   selector: 'mega-select',
@@ -22,43 +25,38 @@ export interface MegaSelectOption {
   ],
   template: `
     @if (label()) {
-      <label class="mega-field__label" [for]="id()">{{ label() }}</label>
+      <label class="form-label mega-field__label" [for]="id()">{{ label() }}</label>
     }
-    <div class="mega-control" [class.mega-control--invalid]="isInvalid()">
-      <select
-        class="mega-select__control"
-        [attr.id]="id()"
-        [attr.aria-label]="ariaLabel() || null"
-        [attr.aria-describedby]="describedBy()"
-        [attr.aria-invalid]="isInvalid() ? 'true' : null"
-        [disabled]="disabled()"
-        [value]="value()"
-        (change)="onChangeValue($event)"
-        (blur)="onTouched()"
-      >
-        @if (placeholder()) {
-          <option value="" [disabled]="required()">{{ placeholder() }}</option>
-        }
-        @for (option of options(); track option.value) {
-          <option [value]="option.value" [disabled]="option.disabled ?? false">
-            {{ option.label }}
-          </option>
-        }
-        <ng-content />
-      </select>
-      <svg class="mega-select__chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-        <path
-          d="M3 6l5 5 5-5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </div>
-    @if (isInvalid() && error()) {
-      <p class="mega-field__hint mega-field__hint--error" [attr.id]="errorId()">{{ error() }}</p>
+    <select
+      class="form-select form-select-sm mega-field-control"
+      [class.is-valid]="currentState() === 'valid'"
+      [class.is-invalid]="showInvalid()"
+      [class.is-warning]="currentState() === 'warning'"
+      [attr.id]="id()"
+      [attr.aria-label]="ariaLabel() || null"
+      [attr.aria-describedby]="describedBy()"
+      [attr.aria-invalid]="showInvalid() ? 'true' : null"
+      [disabled]="disabled()"
+      [value]="value()"
+      (change)="onChangeValue($event)"
+      (blur)="onTouched()"
+    >
+      @if (placeholder()) {
+        <option value="" [disabled]="required()">{{ placeholder() }}</option>
+      }
+      @for (option of options(); track option.value) {
+        <option [value]="option.value" [disabled]="option.disabled ?? false">
+          {{ option.label }}
+        </option>
+      }
+      <ng-content />
+    </select>
+    @if (showInvalid() && error()) {
+      <div class="invalid-feedback d-block" [attr.id]="errorId()">{{ error() }}</div>
+    } @else if (currentState() === 'valid' && validMessage()) {
+      <div class="valid-feedback d-block" [attr.id]="hintId()">{{ validMessage() }}</div>
+    } @else if (currentState() === 'warning' && warningMessage()) {
+      <div class="mega-warning-feedback" [attr.id]="hintId()">{{ warningMessage() }}</div>
     } @else if (hint()) {
       <p class="mega-field__hint" [attr.id]="hintId()">{{ hint() }}</p>
     }
@@ -73,6 +71,15 @@ export class MegaSelectComponent implements ControlValueAccessor {
 
   /** Mensaje de error (estado inválido). */
   error = input<string | null>(null);
+
+  /** Estado explícito de validación (anula `error` si ambos se pasan). */
+  state = input<MegaFieldState>(null);
+
+  /** Mensaje mostrado cuando `state` es `valid`. */
+  validMessage = input<string | null>(null);
+
+  /** Mensaje mostrado cuando `state` es `warning`. */
+  warningMessage = input<string | null>(null);
 
   /** Opciones del selector. */
   options = input<MegaSelectOption[]>([]);
@@ -97,6 +104,15 @@ export class MegaSelectComponent implements ControlValueAccessor {
   onChange: (value: string) => void = () => {};
   onTouched: () => void = () => {};
 
+  /** Estado efectivo: `error` implícito se traduce a `invalid`. */
+  readonly effectiveState = computed<MegaFieldState>(() => {
+    const explicit = this.state();
+    if (explicit) {
+      return explicit;
+    }
+    return this.error() ? 'invalid' : null;
+  });
+
   writeValue(value: string | null | undefined): void {
     this.value.set(value ?? '');
   }
@@ -113,8 +129,13 @@ export class MegaSelectComponent implements ControlValueAccessor {
     this.disabled.set(isDisabled);
   }
 
-  isInvalid(): boolean {
-    return !!this.error();
+  /** Estado efectivo del campo (resuelve `state` o `error`). */
+  currentState(): MegaFieldState {
+    return this.effectiveState();
+  }
+
+  showInvalid(): boolean {
+    return this.effectiveState() === 'invalid';
   }
 
   hintId(): string {
@@ -126,8 +147,12 @@ export class MegaSelectComponent implements ControlValueAccessor {
   }
 
   describedBy(): string | null {
-    if (this.isInvalid() && this.error()) {
+    const st = this.effectiveState();
+    if (st === 'invalid' && this.error()) {
       return this.errorId();
+    }
+    if ((st === 'valid' && this.validMessage()) || (st === 'warning' && this.warningMessage())) {
+      return this.hintId();
     }
     return this.hint() ? this.hintId() : null;
   }

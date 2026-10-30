@@ -122,7 +122,7 @@
                 <div class="field cart-item__qty">
                   <label class="admin-label" [for]="'qty-' + line.variantId">Cantidad</label>
                   <input
-                    class="admin-control"
+                    class="form-control form-control-sm admin-control"
                     type="number"
                     min="1"
                     step="1"
@@ -134,7 +134,7 @@
                 <div class="field cart-item__discount">
                   <label class="admin-label" [for]="'disc-' + line.variantId">Descuento</label>
                   <input
-                    class="admin-control"
+                    class="form-control form-control-sm admin-control"
                     type="text"
                     inputmode="decimal"
                     [id]="'disc-' + line.variantId"
@@ -291,9 +291,9 @@
     </dl>
   }
   <div class="d-flex justify-content-end gap-2" megaModalFooter>
-    <button type="button" class="btn btn-outline-secondary" (click)="result.set(null)">
+    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="result.set(null)">
       Cerrar
     </button>
-    <button type="button" class="btn btn-danger" (click)="printTicket()">🖨️ Imprimir ticket</button>
+    <button type="button" class="btn btn-sm btn-danger" (click)="printTicket()">🖨️ Imprimir ticket</button>
   </div>
 </mega-modal>

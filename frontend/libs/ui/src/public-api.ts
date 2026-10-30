@@ -19,6 +19,7 @@ export * from './lib/price/mega-price.component';
 export * from './lib/product-card/mega-product-card.component';
 export * from './lib/product-gallery/mega-product-gallery.component';
 export * from './lib/select/mega-select.component';
+export * from './lib/shared/mega-field-state';
 export * from './lib/shared/mega-format';
 export * from './lib/skeleton/mega-skeleton.component';
 export * from './lib/status-badge/mega-status-badge.component';
