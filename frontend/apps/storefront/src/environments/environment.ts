@@ -1,6 +1,8 @@
 /** Configuración placeholder de la vitrina (ajustar en producción). */
 export const environment = {
   production: false,
+  /** Prefijo de la API. En dev el proxy de Angular reenvía a localhost:8080. */
+  apiBaseUrl: '/api/v1',
   /** Número WhatsApp en formato internacional sin '+' (placeholder configurable). */
   whatsappNumber: '593999999999',
   whatsappDefaultMessage:

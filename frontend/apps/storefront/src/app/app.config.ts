@@ -1,6 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { PreloadAllModules, provideRouter, withPreloading } from '@angular/router';
+import { provideApiConfig } from '@megalujos/api-client';
+import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -8,5 +10,8 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(),
+    // Base de la API por environment: `/api/v1` en dev, `/megalujos/api` en prod
+    // (nginx reescribe a `/api/v1/$1` hacia el backend en Docker).
+    ...provideApiConfig({ baseUrl: environment.apiBaseUrl }),
   ],
 };

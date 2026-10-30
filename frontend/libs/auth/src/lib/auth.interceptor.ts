@@ -49,7 +49,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         catchError((refreshError: unknown) => {
           auth.logout();
           if (isPlatformBrowser(platformId)) {
-            window.location.href = '/login';
+            // Respeta el <base href> (p.ej. `/megalujos/admin/`) para no salir del árbol.
+            const base = document.querySelector('base')?.getAttribute('href') ?? '/';
+            window.location.href = new URL('login', window.location.origin + base).href;
           } else {
             void router.navigate(['/login']);
           }

@@ -1,0 +1,122 @@
+# ============================================================================
+# MEGALUJOS — Bloque para /etc/nginx/sites-available/control-servidor
+# ============================================================================
+# PEGAR DENTRO del bloque `server { ... }` de control-servidor.
+# NO reemplaza ningún bloque existente: solo agrega la sección 9 de abajo.
+#
+# Rutas expuestas:
+#   /megalujos/admin/  -> SPA administrativa (Angular, /var/www/megalujos/admin)
+#   /megalujos/store/  -> SPA vitrina pública (Angular, /var/www/megalujos/store)
+#   /megalujos/api/    -> API Spring Boot (Docker, 127.0.0.1:18090 -> contenedor :8080)
+#   /uploads/          -> imágenes subidas (mismo backend)
+#
+# IMPORTANTE:
+#   * El backend corre en Docker escuchando SOLO en 127.0.0.1:18090
+#     (puerto de host distinto de 8080; el contenedor usa 8080 por dentro).
+#   * La API se publica bajo /megalujos/api/ y nginx la reescribe a /api/v1/$1,
+#     así NO se toca el `location /api/` existente de Conteo Electoral.
+#   * El frontend fue compilado con --base-href /megalujos/admin/ y
+#     /megalujos/store/, por eso funciona bajo subruta.
+# ============================================================================
+
+    # ==========================================
+    # 9. APLICACIÓN: MEGALUJOS
+    # ==========================================
+
+    # Redirigir si olvidan el slash final
+    location = /megalujos/admin {
+        return 301 /megalujos/admin/;
+    }
+
+    location = /megalujos/store {
+        return 301 /megalujos/store/;
+    }
+
+    # --- Frontend administrativo (Angular) ---
+    location /megalujos/admin/ {
+        alias /var/www/megalujos/admin/;
+        index index.html;
+        try_files $uri $uri/ /megalujos/admin/index.html;
+    }
+
+    # Assets con hash del build (caché larga)
+    location ~* ^/megalujos/admin/(.+\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?|webp|txt|map))$ {
+        alias /var/www/megalujos/admin/$1;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+
+    # index.html sin caché (siempre debe refrescar el hash de los assets)
+    location = /megalujos/admin/index.html {
+        alias /var/www/megalujos/admin/index.html;
+        add_header Cache-Control "no-store";
+        access_log off;
+    }
+
+    # --- Frontend vitrina pública (Angular) ---
+    location /megalujos/store/ {
+        alias /var/www/megalujos/store/;
+        index index.html;
+        try_files $uri $uri/ /megalujos/store/index.html;
+    }
+
+    # Assets con hash del build (caché larga)
+    location ~* ^/megalujos/store/(.+\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?|webp|txt|map))$ {
+        alias /var/www/megalujos/store/$1;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+
+    location = /megalujos/store/index.html {
+        alias /var/www/megalujos/store/index.html;
+        add_header Cache-Control "no-store";
+        access_log off;
+    }
+
+    # --- API REST (Docker) ---
+    # El frontend llama a /megalujos/api/... y nginx reescribe a /api/v1/...
+    location /megalujos/api/ {
+        rewrite ^/megalujos/api/(.*)$ /api/v1/$1 break;
+        proxy_pass http://127.0.0.1:18090;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_connect_timeout 15s;
+    }
+
+    # --- Imágenes subidas (productos/marcas) ---
+    # El backend devuelve URLs /uploads/... ; se sirven desde el mismo contenedor.
+    location /uploads/ {
+        proxy_pass http://127.0.0.1:18090;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        expires 7d;
+        add_header Cache-Control "public";
+        access_log off;
+    }
+
+# ============================================================================
+# NOTAS DE CONFLICTO CON BLOQUES EXISTENTES
+# ============================================================================
+# * `location /api/` (Conteo Electoral, línea existente) NO se modifica:
+#   MEGALUJOS usa /megalujos/api/, que es un prefijo más específico y no choca.
+# * `location /sigrc/api/` (SIGRC, puerto 8080 nativo) NO se modifica:
+#   MEGALUJOS corre en 18090, son puertos independientes.
+# * El `client_max_body_size 500M` global del server block ya cubre las
+#   subidas de imágenes de MEGALUJOS (el backend limita a 25MB por archivo).
